@@ -12,7 +12,9 @@ import (
 	defaultLog "log"
 
 	"github.com/St3plox/Blogchain/app/backend/user-service/handlers"
+	"github.com/St3plox/Blogchain/business/web/auth"
 	"github.com/St3plox/Blogchain/business/web/v1/debug"
+	"github.com/St3plox/Blogchain/foundation/keystore"
 	"github.com/St3plox/Blogchain/foundation/logger"
 	"github.com/ardanlabs/conf/v3"
 	"github.com/rs/zerolog"
@@ -38,7 +40,7 @@ func run(log *zerolog.Logger) error {
 		Str("BUILD", build).
 		Msg("startup")
 
-	// -------------------------------------------------------------------------
+		// -------------------------------------------------------------------------
 	// Configuration
 
 	cfg := struct {
@@ -50,6 +52,11 @@ func run(log *zerolog.Logger) error {
 			ShutdownTimeout time.Duration `conf:"default:20s,mask"`
 			APIHost         string        `conf:"default::3000"`
 			DebugHost       string        `conf:"default::4000"`
+		}
+		Auth struct {
+			KeysFolder string `conf:"default:zarf/keys/"`
+			ActiveKID  string `conf:"default:54bb2165-71e1-41a6-af3e-7da4a0e1e2c1"`
+			Issuer     string `conf:"default:service project"`
 		}
 	}{
 		Version: conf.Version{
@@ -82,6 +89,27 @@ func run(log *zerolog.Logger) error {
 	log.Info().Str("config", out).Msg("startup")
 
 	// -------------------------------------------------------------------------
+	// Initialize authentication support
+
+	log.Info().Str("status", "startup").Msg("nitializing V1 API support")
+
+	// Simple keystore versus using Vault.
+	ks, err := keystore.NewFS(os.DirFS(cfg.Auth.KeysFolder))
+	if err != nil {
+		return fmt.Errorf("reading keys: %w", err)
+	}
+
+	authCfg := auth.Config{
+		Log:       log,
+		KeyLookup: ks,
+	}
+
+	auth, err := auth.New(authCfg)
+	if err != nil {
+		return fmt.Errorf("constructing auth: %w", err)
+	}
+
+	// -------------------------------------------------------------------------
 	// Start Debug Service
 
 	log.Info().
@@ -108,6 +136,7 @@ func run(log *zerolog.Logger) error {
 	apiMux := handlers.APIMux(handlers.APIMuxConfig{
 		Shutdown: shutdown,
 		Log:      log,
+		Auth:     auth,
 	})
 
 	errorLogger := zerolog.New(os.Stderr).With().Timestamp().Logger()

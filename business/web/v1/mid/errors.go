@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/St3plox/Blogchain/business/web/auth"
 	v1 "github.com/St3plox/Blogchain/business/web/v1"
 	"github.com/St3plox/Blogchain/foundation/web"
 	"github.com/rs/zerolog"
@@ -29,6 +30,10 @@ func Errors(log *zerolog.Logger) web.Middleware {
 						Error: reqErr.Error(),
 					}
 					status = reqErr.Status
+
+				case auth.IsAuthError(err):
+					er = v1.ErrorResponse{Error: err.Error()}
+					status = http.StatusForbidden
 
 				default:
 					er = v1.ErrorResponse{

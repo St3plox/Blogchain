@@ -24,8 +24,8 @@ contract PostStorage {
         
         Post memory newPost = Post({
             author: msg.sender,
-            title: _title,
             content: _content,
+            title: _title,
             timestamp: block.timestamp,
             category: _category
         });

@@ -14,10 +14,9 @@ func New() *Handler {
 	return &Handler{}
 }
 
-
-func (h *Handler) Get (ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+func (h *Handler) Get(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 	err := web.Respond(ctx, w, nil, http.StatusOK)
-	if err != nil { 
+	if err != nil {
 		return err
 	}
 	return nil
