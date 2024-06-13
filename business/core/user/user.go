@@ -43,7 +43,9 @@ func NewCore(storer Storer) *Core {
 
 // Create inserts a new user into the database.
 func (c *Core) Create(ctx context.Context, nu NewUser) (User, error) {
-	// TODO: implement me
+
+	
+
 	return User{}, nil
 }
 
