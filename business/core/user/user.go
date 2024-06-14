@@ -5,8 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"net/mail"
+	"time"
 
-	order "github.com/St3plox/Blogchain/business/data"
+	"github.com/St3plox/Blogchain/business/data/order"
+	"github.com/St3plox/Blogchain/foundation/blockchain"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -19,7 +21,7 @@ var (
 )
 
 type Storer interface {
-	Create(ctx context.Context, usr User)
+	Create(ctx context.Context, usr User) error
 	Update(ctx context.Context, usr User) error
 	Delete(ctx context.Context, usr User) error
 	Query(ctx context.Context, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]User, error)
@@ -32,21 +34,50 @@ type Storer interface {
 // Core manages the set of APIs for user access.
 type Core struct {
 	storer Storer
+	netUrl string
 }
 
 // NewCore constructs a core for user api access.
-func NewCore(storer Storer) *Core {
+func NewCore(storer Storer, netUrl string) *Core {
 	return &Core{
 		storer: storer,
+		netUrl: netUrl,
 	}
 }
 
 // Create inserts a new user into the database.
 func (c *Core) Create(ctx context.Context, nu NewUser) (User, error) {
 
-	
+	account, err := blockchain.CreateEthAccount(c.netUrl)
+	if err != nil {
+		return User{}, fmt.Errorf("create : %w", err)
+	}
 
-	return User{}, nil
+	// NOTE: Remove later
+	roles := make([]Role, 1)
+	roles[0] = RoleUser
+
+	now := time.Now()
+
+	// TODO: Private key encryption
+	user := User{
+		ID:             uuid.New(),
+		Name:           nu.Name,
+		Email:          nu.Email,
+		HashedPassword: nu.PasswordHash,
+		Roles:          roles,
+		DateCreated:    now,
+		DateUpdated:    now,
+		PublicKey:      account.PublicKey,
+		PrivateKey:     account.PrivateKey,
+		AddressHex:     account.AddressHex,
+	}
+
+	if err := c.storer.Create(ctx, user); err != nil {
+		return User{}, fmt.Errorf("create: %w", err)
+	}
+
+	return user, nil
 }
 
 // Delete removes a user from the database.

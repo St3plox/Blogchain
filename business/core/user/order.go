@@ -1,6 +1,6 @@
 package user
 
-import order "github.com/St3plox/Blogchain/business/data"
+import "github.com/St3plox/Blogchain/business/data/order"
 
 // DefaultOrderBy represents the default way we sort.
 var DefaultOrderBy = order.NewBy(OrderByID, order.ASC)

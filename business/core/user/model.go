@@ -7,14 +7,16 @@ import (
 )
 
 type User struct {
-	ID               uuid.UUID
-	Name             string
-	Email            string
-	Roles            []Role
-	HashedPassword   []byte
-	EncryptedAddress string
-	DateCreated      time.Time
-	DateUpdated      time.Time
+	ID             uuid.UUID
+	Name           string
+	Email          string
+	Roles          []Role
+	HashedPassword []byte
+	AddressHex     string
+	PublicKey      []byte
+	PrivateKey     []byte
+	DateCreated    time.Time
+	DateUpdated    time.Time
 }
 
 type NewUser struct {

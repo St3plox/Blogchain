@@ -12,12 +12,16 @@ import (
 	defaultLog "log"
 
 	"github.com/St3plox/Blogchain/app/backend/user-service/handlers"
+	"github.com/St3plox/Blogchain/business/core/user"
+	"github.com/St3plox/Blogchain/business/core/user/userdb"
 	"github.com/St3plox/Blogchain/business/web/auth"
 	"github.com/St3plox/Blogchain/business/web/v1/debug"
 	"github.com/St3plox/Blogchain/foundation/keystore"
 	"github.com/St3plox/Blogchain/foundation/logger"
 	"github.com/ardanlabs/conf/v3"
 	"github.com/rs/zerolog"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var build = "develop"
@@ -40,7 +44,7 @@ func run(log *zerolog.Logger) error {
 		Str("BUILD", build).
 		Msg("startup")
 
-		// -------------------------------------------------------------------------
+	// -------------------------------------------------------------------------
 	// Configuration
 
 	cfg := struct {
@@ -57,6 +61,9 @@ func run(log *zerolog.Logger) error {
 			KeysFolder string `conf:"default:zarf/keys/"`
 			ActiveKID  string `conf:"default:54bb2165-71e1-41a6-af3e-7da4a0e1e2c1"`
 			Issuer     string `conf:"default:service project"`
+		}
+		DB struct {
+			Uri string `conf:"default:mongodb://localhost:27017"`
 		}
 	}{
 		Version: conf.Version{
@@ -87,6 +94,27 @@ func run(log *zerolog.Logger) error {
 		return fmt.Errorf("generating config for output: %w", err)
 	}
 	log.Info().Str("config", out).Msg("startup")
+
+	// -------------------------------------------------------------------------
+	// Database Support
+
+	log.Info().Str("status", "startup").Str("uri", cfg.DB.Uri).Msg("initializing database support")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(cfg.DB.Uri))
+	defer func() {
+		if err = client.Disconnect(ctx); err != nil {
+			panic(err)
+		}
+	}()
+	if err != nil {
+		return err
+	}
+
+	userStore := userdb.NewStore(log, client)
+	userCore := user.NewCore(userStore, cfg.Web.APIHost)
 
 	// -------------------------------------------------------------------------
 	// Initialize authentication support
@@ -137,6 +165,7 @@ func run(log *zerolog.Logger) error {
 		Shutdown: shutdown,
 		Log:      log,
 		Auth:     auth,
+		UserCore: userCore,
 	})
 
 	errorLogger := zerolog.New(os.Stderr).With().Timestamp().Logger()
