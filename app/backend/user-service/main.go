@@ -114,7 +114,7 @@ func run(log *zerolog.Logger) error {
 	}
 
 	userStore := userdb.NewStore(log, client)
-	userCore := user.NewCore(userStore, cfg.Web.APIHost)
+	userCore := user.NewCore(userStore, "http://127.0.0.1:8545/")
 
 	// -------------------------------------------------------------------------
 	// Initialize authentication support

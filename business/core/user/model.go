@@ -22,5 +22,5 @@ type User struct {
 type NewUser struct {
 	Name         string
 	Email        string
-	PasswordHash []byte
+	PasswordHash []byte `json:"password_hash"`
 }
