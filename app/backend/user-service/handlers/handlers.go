@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/St3plox/Blogchain/app/backend/user-service/handlers/maingrp"
@@ -16,19 +15,17 @@ type APIMuxConfig struct {
 	Shutdown chan os.Signal
 	Log      *zerolog.Logger
 	Auth     *auth.Auth
-
 	UserCore *user.Core
 }
 
 func APIMux(cfg APIMuxConfig) *web.App {
 	app := web.NewApp(cfg.Shutdown, mid.Logger(cfg.Log), mid.Errors(cfg.Log), mid.Panics())
 
-	h := maingrp.New(cfg.UserCore)
-
-	fmt.Println("Sucker")
+	h := maingrp.New(cfg.UserCore, cfg.Auth)
 
 	app.Handle("GET /sucker", h.Get, mid.Authenticate(cfg.Auth), mid.Authorize(cfg.Auth, auth.RuleAny))
-	app.Handle("POST /user", h.PostUser)
+	app.Handle("POST /register", h.RegisterUser)
+	app.Handle("POST /login", h.LoginUser)
 
 	return app
 }

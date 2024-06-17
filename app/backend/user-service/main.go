@@ -59,7 +59,7 @@ func run(log *zerolog.Logger) error {
 		}
 		Auth struct {
 			KeysFolder string `conf:"default:zarf/keys/"`
-			ActiveKID  string `conf:"default:54bb2165-71e1-41a6-af3e-7da4a0e1e2c1"`
+			ActiveKID  string `conf:"default:private_key"`
 			Issuer     string `conf:"default:service project"`
 		}
 		DB struct {
@@ -119,7 +119,7 @@ func run(log *zerolog.Logger) error {
 	// -------------------------------------------------------------------------
 	// Initialize authentication support
 
-	log.Info().Str("status", "startup").Msg("nitializing V1 API support")
+	log.Info().Str("status", "startup").Msg("initializing V1 API AUTH support")
 
 	// Simple keystore versus using Vault.
 	ks, err := keystore.NewFS(os.DirFS(cfg.Auth.KeysFolder))
@@ -180,7 +180,7 @@ func run(log *zerolog.Logger) error {
 
 	serverErrors := make(chan error, 1)
 	go func() {
-		log.Info(	).
+		log.Info().
 			Str("status", "api router started").
 			Str("host", api.Addr).
 			Msg("startup")
