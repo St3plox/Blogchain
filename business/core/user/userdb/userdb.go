@@ -2,6 +2,7 @@ package userdb
 
 import (
 	"context"
+	"errors"
 	"net/mail"
 
 	"github.com/St3plox/Blogchain/business/core/user"
@@ -31,10 +32,34 @@ func NewStore(log *zerolog.Logger, client *mongo.Client) *Store {
 	}
 }
 
+// NOTE: add email verification in the future
 func (s *Store) Create(ctx context.Context, usr user.User) error {
-	_, err := s.collection.InsertOne(ctx, usr)
+	// Check if the username already exists
+	usernameFilter := bson.M{"name": usr.Name}
+	usernameCount, err := s.collection.CountDocuments(ctx, usernameFilter)
 	if err != nil {
-		s.log.Error().Err(err).Msg("mongodb")
+		s.log.Error().Err(err).Msg("mongodb: checking username uniqueness")
+		return err
+	}
+	if usernameCount > 0 {
+		return errors.New("username already exists")
+	}
+
+	// Check if the email already exists
+	emailFilter := bson.M{"email": usr.Email}
+	emailCount, err := s.collection.CountDocuments(ctx, emailFilter)
+	if err != nil {
+		s.log.Error().Err(err).Msg("mongodb: checking email uniqueness")
+		return err
+	}
+	if emailCount > 0 {
+		return errors.New("email already exists")
+	}
+
+	// Insert the new user if both the username and email are unique
+	_, err = s.collection.InsertOne(ctx, usr)
+	if err != nil {
+		s.log.Error().Err(err).Msg("mongodb: inserting user")
 	}
 	return err
 }
@@ -104,7 +129,6 @@ func (s *Store) Count(ctx context.Context, filter user.QueryFilter) (int, error)
 	}
 	return int(count), nil
 }
-
 
 func (s *Store) QueryByID(ctx context.Context, userID uuid.UUID) (user.User, error) {
 	filter := bson.M{"_id": userID}
