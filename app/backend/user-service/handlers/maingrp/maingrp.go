@@ -95,7 +95,7 @@ func (h *Handler) LoginUser(ctx context.Context, w http.ResponseWriter, r *http.
 
 	// Generate JWT token
 	claims := auth.Claims{Roles: roles}
-	token, err := h.auth.GenerateToken(usr.ID.String(), claims)
+	token, err := h.auth.GenerateToken("private_key", claims)
 	if err != nil {
 		return v1.NewRequestError(errors.New("Token generation error "+err.Error()), http.StatusInternalServerError)
 	}

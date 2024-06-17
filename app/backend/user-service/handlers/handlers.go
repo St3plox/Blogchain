@@ -23,7 +23,7 @@ func APIMux(cfg APIMuxConfig) *web.App {
 
 	h := maingrp.New(cfg.UserCore, cfg.Auth)
 
-	app.Handle("GET /sucker", h.Get, mid.Authenticate(cfg.Auth), mid.Authorize(cfg.Auth, auth.RuleAny))
+	app.Handle("GET /sucker", h.Get, mid.Authenticate(cfg.Auth))
 	app.Handle("POST /register", h.RegisterUser)
 	app.Handle("POST /login", h.LoginUser)
 
