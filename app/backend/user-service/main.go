@@ -180,7 +180,7 @@ func run(log *zerolog.Logger) error {
 
 	serverErrors := make(chan error, 1)
 	go func() {
-		log.Info().
+		log.Info(	).
 			Str("status", "api router started").
 			Str("host", api.Addr).
 			Msg("startup")

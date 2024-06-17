@@ -3,11 +3,13 @@ package web
 import (
 	"context"
 	"errors"
+	"log"
 	"net/http"
 	"os"
 	"syscall"
 	"time"
 
+	v1 "github.com/St3plox/Blogchain/business/web/v1"
 	"github.com/google/uuid"
 )
 
@@ -39,32 +41,41 @@ func (a *App) Handle(path string, handler Handler, mw ...Middleware) {
 	handler = wrapMiddleware(a.mw, handler)
 
 	h := func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-
 		var v = Values{
 			TraceID: uuid.NewString(),
 			Now:     time.Now().UTC(),
-		}
-		ctx = context.WithValue(ctx, key, &v)
-
-		if err := handler(ctx, w, r); err != nil {
-			if validateShutdown(err) {
-				a.SignalShutdown()
-				return nil // Return nil here to indicate graceful shutdown without error
 			}
-			return err
-		}
-		return nil // Return nil here to indicate successful handling without error
+			ctx = context.WithValue(ctx, key, &v)
+
+			if err := handler(ctx, w, r); err != nil {
+				if validateShutdown(err) {
+					a.SignalShutdown()
+					return nil // Return nil here to indicate graceful shutdown without error
+				}
+				return err
+			}
+			return nil // Return nil here to indicate successful handling without error
 	}
 
 	// Wrap 'h' in http.HandlerFunc to match the ServeMux.Handler method signature
 	a.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
+		log.Default().Println("Entered HandleFunc")
 		err := h(r.Context(), w, r)
 		if err != nil {
-			http.Error(w, "Internal Se1rver Error", http.StatusInternalServerError)
+			log.Default().Println("Entered != nil section HandleFunc")
+			// Check if it's a not found error
+			var reqErr *v1.RequestError
+			if errors.As(err, &reqErr) {
+				log.Default().Println("Entered as HandleFunc")
+				http.Error(w, reqErr.Err.Error(), reqErr.Status)
+				return
+			}
+			// Handle other errors
+			log.Default().Println("Entered unknown error section HandleFunc")
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		}
 	})
 }
-
 func validateShutdown(err error) bool {
 
 	// Ignore syscall.EPIPE and syscall.ECONNRESET errors which occurs

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/St3plox/Blogchain/business/core/user"
@@ -15,8 +16,8 @@ type Handler struct {
 	user *user.Core
 }
 
-func New() *Handler {
-	return &Handler{}
+func New(user *user.Core) *Handler {
+	return &Handler{user: user}
 }
 
 func (h *Handler) Get(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
@@ -28,6 +29,8 @@ func (h *Handler) Get(ctx context.Context, w http.ResponseWriter, r *http.Reques
 }
 
 func (h *Handler) PostUser(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+
+	fmt.Println("Endered PostUser Handler")
 
 	var nu user.NewUser
 	err := json.NewDecoder(r.Body).Decode(&nu)
