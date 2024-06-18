@@ -9,6 +9,7 @@ import (
 
 	"github.com/St3plox/Blogchain/business/data/order"
 	"github.com/St3plox/Blogchain/foundation/blockchain"
+	"github.com/St3plox/Blogchain/foundation/keystore"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -53,11 +54,13 @@ func (c *Core) Create(ctx context.Context, nu NewUser) (User, error) {
 		return User{}, fmt.Errorf("create : %w", err)
 	}
 
-	// NOTE: Remove later
-	roles := make([]Role, 1)
-	roles[0] = RoleUser
-
+	roles := []Role{RoleUser, RoleAdmin}
 	now := time.Now()
+
+	secretKey, err := keystore.GenerateSecretKey()
+	if err != nil {
+		return User{}, fmt.Errorf("create : %w", err)
+	}
 
 	// TODO: Private key encryption
 	user := User{
@@ -70,6 +73,7 @@ func (c *Core) Create(ctx context.Context, nu NewUser) (User, error) {
 		DateUpdated:    now,
 		PublicKey:      account.PublicKey,
 		PrivateKey:     account.PrivateKey,
+		SecretKey:      secretKey,
 		AddressHex:     account.AddressHex,
 	}
 

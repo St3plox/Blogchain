@@ -7,16 +7,17 @@ import (
 )
 
 type User struct {
-	ID             uuid.UUID
-	Name           string
-	Email          string
-	Roles          []Role
-	HashedPassword []byte
-	AddressHex     string
-	PublicKey      []byte
-	PrivateKey     []byte
-	DateCreated    time.Time
-	DateUpdated    time.Time
+	ID             uuid.UUID `json:"id"`
+	Name           string    `json:"name"`
+	Email          string    `json:"email"`
+	Roles          []Role    `json:"roles"`
+	HashedPassword []byte    `json:"hashed_password"`
+	AddressHex     string    `json:"address_hex"`
+	PublicKey      []byte    `json:"public_key"`
+	PrivateKey     []byte    `json:"private_key"`
+	SecretKey      []byte    `json:"secret_key"`
+	DateCreated    time.Time `json:"date_created"`
+	DateUpdated    time.Time `json:"date_updated"`
 }
 
 type NewUser struct {

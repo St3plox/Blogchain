@@ -4,6 +4,7 @@ package keystore
 
 import (
 	"bytes"
+	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
@@ -132,4 +133,22 @@ func (ks *KeyStore) PublicKey(kid string) (string, error) {
 	}
 
 	return b.String(), nil
+}
+
+func GenerateSecretKey() ([]byte, error) {
+	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		return nil, fmt.Errorf("error generating RSA key: %w", err)
+	}
+
+	// Convert the private key to PEM format.
+	privateKeyPEM := pem.Block{
+		Type:  "RSA PRIVATE KEY",
+		Bytes: x509.MarshalPKCS1PrivateKey(privateKey),
+	}
+
+	// Encode the PEM block to a slice of bytes.
+	privateKeyBytes := pem.EncodeToMemory(&privateKeyPEM)
+
+	return privateKeyBytes, nil
 }

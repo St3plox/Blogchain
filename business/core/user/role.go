@@ -10,13 +10,13 @@ var (
 
 // Set of known roles.
 var roles = map[string]Role{
-	RoleAdmin.name: RoleAdmin,
-	RoleUser.name:  RoleUser,
+	RoleAdmin.Name: RoleAdmin,
+	RoleUser.Name:  RoleUser,
 }
 
 // Role represents a role in the system.
 type Role struct {
-	name string
+	Name string
 }
 
 // ParseRole parses the string value and returns a role if one exists.
@@ -40,23 +40,23 @@ func MustParseRole(value string) Role {
 	return role
 }
 
-// Name returns the name of the role.
+/* // Name returns the name of the role.
 func (r Role) Name() string {
 	return r.name
-}
+} */
 
 // UnmarshalText implement the unmarshal interface for JSON conversions.
 func (r *Role) UnmarshalText(data []byte) error {
-	r.name = string(data)
+	r.Name = string(data)
 	return nil
 }
 
 // MarshalText implement the marshal interface for JSON conversions.
 func (r Role) MarshalText() ([]byte, error) {
-	return []byte(r.name), nil
+	return []byte(r.Name), nil
 }
 
 // Equal provides support for the go-cmp package and testing.
 func (r Role) Equal(r2 Role) bool {
-	return r.name == r2.name
+	return r.Name == r2.Name
 }

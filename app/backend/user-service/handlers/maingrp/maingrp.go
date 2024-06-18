@@ -5,13 +5,16 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/mail"
+	"time"
 
 	"github.com/St3plox/Blogchain/business/core/user"
 	"github.com/St3plox/Blogchain/business/web/auth"
 	v1 "github.com/St3plox/Blogchain/business/web/v1"
 	"github.com/St3plox/Blogchain/foundation/web"
+	"github.com/golang-jwt/jwt/v4"
 )
 
 type Handler struct {
@@ -24,6 +27,14 @@ func New(user *user.Core, auth *auth.Auth) *Handler {
 }
 
 func (h *Handler) Get(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+
+	/* claims := auth.GetClaims(ctx)
+	if claims.Subject == "" {
+		return v1.NewRequestError(errors.New("missing claims"), http.StatusUnauthorized)
+	} */
+
+	// userId := claims.Subject
+
 	err := web.Respond(ctx, w, nil, http.StatusOK)
 	if err != nil {
 		return err
@@ -45,8 +56,17 @@ func (h *Handler) RegisterUser(ctx context.Context, w http.ResponseWriter, r *ht
 		return v1.NewRequestError(errors.New("Create error "+err.Error()), http.StatusInternalServerError)
 	}
 
-	roles := []user.Role{user.RoleUser}
-	claims := auth.Claims{Roles: roles}
+	claims := auth.Claims{
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+			Subject:   usr.ID.String(),
+			
+		},
+		Roles: usr.Roles,
+	}
+
+	fmt.Println(usr.Roles)
+
 	token, err := h.auth.GenerateToken("private_key", claims)
 	if err != nil {
 		return v1.NewRequestError(errors.New("Token generation error "+err.Error()), http.StatusInternalServerError)
@@ -91,10 +111,16 @@ func (h *Handler) LoginUser(ctx context.Context, w http.ResponseWriter, r *http.
 		return v1.NewRequestError(errors.New("invalid password"), http.StatusUnauthorized)
 	}
 
-	roles := []user.Role{user.RoleUser}
+	claims := auth.Claims{
+		RegisteredClaims: jwt.RegisteredClaims{
+			Subject: usr.ID.String(),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+		},
+		Roles: usr.Roles,
+	}
 
-	// Generate JWT token
-	claims := auth.Claims{Roles: roles}
+	fmt.Println(usr.Roles)
+
 	token, err := h.auth.GenerateToken("private_key", claims)
 	if err != nil {
 		return v1.NewRequestError(errors.New("Token generation error "+err.Error()), http.StatusInternalServerError)
