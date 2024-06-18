@@ -8,50 +8,31 @@ const netUrl = "http://localhost:8545"
 
 const hardhatUsedAddr = "0xdf57089febbacf7ba0bc227dafbffa9fc08a93fdc68e1e42411a14efcf23656e"
 
-//Tests are made to run in hardhat net
+// Tests are made to run in hardhat net
 
 func Test_isAvailable(t *testing.T) {
-	type args struct {
-		addressHex string
-		netUrl     string
+	client, err := NewClient(netUrl)
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
 	}
+
 	tests := []struct {
 		name    string
-		args    args
+		address string
 		want    bool
 		wantErr bool
 	}{
 		{
-			name: "Address with no code and no transactions",
-			args: args{
-				addressHex: "0xUnusedAddressHere",
-				netUrl:     netUrl,
-			},
+			name:    "Address with no code and no transactions",
+			address: "0xUnusedAddressHere",
 			want:    true,
 			wantErr: false,
 		},
-		/* 		{
-		   			name: "Address with contract code",
-		   			args: args{
-		   				addressHex: hardhatUsedAddr, // Replace with an address known to have contract code
-		   				netUrl:     netUrl,
-		   			},
-		   			want:    false,
-		   			wantErr: false,
-		   		},
-		   		{
-		   			name: "Address with transactions",
-		   			args: args{
-		   				addressHex: hardhatUsedAddr,
-		   				netUrl:     netUrl,
-		   			},
-		   			want:    false,
-		   			wantErr: false,
-		   		}, */
+		// Add more test cases as needed
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := isAvailable(tt.args.addressHex, tt.args.netUrl)
+			got, err := client.isAvailable(tt.address)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("isAvailable() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -64,32 +45,24 @@ func Test_isAvailable(t *testing.T) {
 }
 
 func TestCreateEthAccount(t *testing.T) {
-	type args struct {
-		netUrl string
+	client, err := NewClient(netUrl)
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
 	}
+
 	tests := []struct {
 		name    string
-		args    args
 		wantErr bool
 	}{
 		{
-			name: "Successful account creation",
-			args: args{
-				netUrl: netUrl,
-			},
+			name:    "Successful account creation",
 			wantErr: false,
 		},
-		/* 		{
-			name: "Unsuccessful account creation due to address being unavailable",
-			args: args{
-				netUrl: netUrl,
-			},
-			wantErr: true,
-		}, */
+		// Add more test cases as needed
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := CreateEthAccount(tt.args.netUrl)
+			got, err := client.CreateEthAccount()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("CreateEthAccount() error = %v, wantErr %v", err, tt.wantErr)
 				return

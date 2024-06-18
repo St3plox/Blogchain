@@ -114,7 +114,10 @@ func run(log *zerolog.Logger) error {
 	}
 
 	userStore := userdb.NewStore(log, client)
-	userCore := user.NewCore(userStore, "http://127.0.0.1:8545/")
+	userCore, err := user.NewCore(userStore, "http://127.0.0.1:8545/")
+	if err != nil {
+		return err
+	}
 
 	// -------------------------------------------------------------------------
 	// Initialize authentication support

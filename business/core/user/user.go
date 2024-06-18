@@ -34,22 +34,28 @@ type Storer interface {
 
 // Core manages the set of APIs for user access.
 type Core struct {
-	storer Storer
-	netUrl string
+	storer    Storer
+	ethClient *blockchain.Client
 }
 
 // NewCore constructs a core for user api access.
-func NewCore(storer Storer, netUrl string) *Core {
-	return &Core{
-		storer: storer,
-		netUrl: netUrl,
+func NewCore(storer Storer, netUrl string) (*Core, error) {
+
+	ethclient, err := blockchain.NewClient(netUrl)
+	if err != nil {
+		return nil, fmt.Errorf("error creating eth client %e", err)
 	}
+
+	return &Core{
+		storer:    storer,
+		ethClient: ethclient,
+	}, nil
 }
 
 // Create inserts a new user into the database.
 func (c *Core) Create(ctx context.Context, nu NewUser) (User, error) {
 
-	account, err := blockchain.CreateEthAccount(c.netUrl)
+	account, err := c.ethClient.CreateEthAccount()
 	if err != nil {
 		return User{}, fmt.Errorf("create : %w", err)
 	}

@@ -8,7 +8,6 @@ import (
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/pkg/errors"
 )
 
@@ -20,7 +19,7 @@ type AccountData struct {
 
 // NOTE: needs to be changed in future
 
-func CreateEthAccount(netUrl string) (AccountData, error) {
+func (c *Client) CreateEthAccount() (AccountData, error) {
 
 	// Generate a new private key
 	privateKey, err := crypto.GenerateKey()
@@ -39,7 +38,7 @@ func CreateEthAccount(netUrl string) (AccountData, error) {
 	publicKeyBytes := crypto.FromECDSAPub(publicKeyECDSA)
 	address := crypto.PubkeyToAddress(*publicKeyECDSA).Hex()
 
-	available, err := isAvailable(address, netUrl)
+	available, err := c.isAvailable(address)
 	if err != nil {
 		return AccountData{}, err
 	}
@@ -55,18 +54,12 @@ func CreateEthAccount(netUrl string) (AccountData, error) {
 }
 
 // isAvailable checks if an Ethereum address is "available" (no contract code, no transaction history)
-func isAvailable(addressHex string, netUrl string) (bool, error) {
-
-	client, err := ethclient.Dial(netUrl)
-	if err != nil {
-		return false, fmt.Errorf("failed to connect to the Ethereum client: %v", err)
-	}
-	defer client.Close()
+func (c *Client) isAvailable(addressHex string) (bool, error) {
 
 	address := common.HexToAddress(addressHex)
 
 	// Check if the address has associated code (indicating it may be a contract)
-	bytecode, err := client.CodeAt(context.Background(), address, nil) // nil is the latest block
+	bytecode, err := c.client.CodeAt(context.Background(), address, nil) // nil is the latest block
 	if err != nil {
 		return false, fmt.Errorf("failed to get code: %v", err)
 	}
@@ -78,7 +71,7 @@ func isAvailable(addressHex string, netUrl string) (bool, error) {
 	query := ethereum.FilterQuery{
 		Addresses: []common.Address{address},
 	}
-	logs, err := client.FilterLogs(context.Background(), query)
+	logs, err := c.client.FilterLogs(context.Background(), query)
 	if err != nil {
 		return false, fmt.Errorf("failed to get logs: %v", err)
 	}

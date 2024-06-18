@@ -1,9 +1,22 @@
 package blockchain
 
+import (
+	"fmt"
+
+	"github.com/ethereum/go-ethereum/ethclient"
+)
+
 type Client struct {
 	netUrl string
+	client *ethclient.Client
 }
 
-func NewClient(rawurl string) *Client {
-	return &Client{netUrl: rawurl}
+func NewClient(rawurl string) (*Client, error) {
+
+	client, err := ethclient.Dial(rawurl)
+	if err != nil {
+		return nil, fmt.Errorf("error setablishing connection: %e", err)
+	}
+
+	return &Client{netUrl: rawurl, client: client}, nil
 }

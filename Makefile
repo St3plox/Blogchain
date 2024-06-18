@@ -37,7 +37,7 @@ stop:
 	docker rm $(BACKEND_NAME)
 
 run-tests:
-	go test ./foundation/blockchain/account_test.go
+	go test ./foundation/blockchain 
 
 launch-mongo:
 	docker run -d -p 27017:27017 --name mongodb mongodb/mongodb-community-server:6.0-ubi8
