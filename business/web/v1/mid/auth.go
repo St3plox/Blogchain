@@ -29,14 +29,13 @@ func Authenticate(a *auth.Auth) web.Middleware {
 	return m
 }
 
-// TODO: Fix 403 error callback
 // Authorize validates that an authenticated user has at least one role from a
 // specified list. This method constructs the actual function that is used.
 func Authorize(a *auth.Auth, rule string) web.Middleware {
 	m := func(handler web.Handler) web.Handler {
 		h := func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 			claims := auth.GetClaims(ctx)
-			
+
 			fmt.Println(claims.Subject)
 			fmt.Println(claims.Roles)
 
