@@ -8,3 +8,5 @@ artifacts
 
 *.pem
 keys
+
+/contracts/cfg/*

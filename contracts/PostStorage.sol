@@ -1,9 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "./PostCategory.sol";
-
 contract PostStorage {
+    enum Category {
+        Blog,
+        News,
+        Article
+    }
+
     struct Post {
         address author;
         string title;
@@ -20,8 +24,11 @@ contract PostStorage {
         Category category
     );
 
-    function post(string memory _title, string memory _content, Category _category) public {
-        
+    function post(
+        string memory _title,
+        string memory _content,
+        Category _category
+    ) public {
         Post memory newPost = Post({
             author: msg.sender,
             content: _content,
@@ -39,8 +46,7 @@ contract PostStorage {
         return userPosts[msg.sender];
     }
 
-    function getUsersPost(address user)public view returns (Post[] memory){
+    function getUsersPost(address user) public view returns (Post[] memory) {
         return userPosts[user];
     }
-    
 }
