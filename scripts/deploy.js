@@ -22,14 +22,10 @@ async function main() {
 
     console.log(`${contractName} deployed at ${contract.address}`);
 
-    // Get the contract ABI
-    const artifact = await hre.artifacts.readArtifact(contractName);
-    const { abi } = artifact;
 
     // Save the ABI and address to the contractData object
     contractData[contractName] = {
       address: contract.address,
-      abi: abi
     }; 
   }
 
@@ -41,8 +37,6 @@ async function main() {
 
   const outputFile = path.join(cfgDir, 'deployedContracts.json');
   fs.writeFileSync(outputFile, JSON.stringify(contractData, null, 2));
-
-  console.log(`Contract ABIs and addresses saved to ${outputFile}`);
 }
 
 // Execute the main function

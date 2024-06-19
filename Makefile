@@ -45,3 +45,9 @@ launch-mongo:
 stop-mongo:
 	docker stop mongodb
 	docker rm mongodb
+
+solc-compile:
+	 solc --abi --bin -o contracts/bin contracts/PostStorage.sol
+
+generate-contract:
+	abigen --abi=contracts/bin/PostStorage.abi --bin=contracts/bin/PostStorage.bin --pkg=contract --out=foundation/blockchain/contract/PostStorage.go
