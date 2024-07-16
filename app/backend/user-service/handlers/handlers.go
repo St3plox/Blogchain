@@ -26,15 +26,16 @@ func APIMux(cfg APIMuxConfig) *web.App {
 
 	h := maingrp.New(cfg.UserCore, cfg.Auth)
 
-	app.Handle("GET /sucker", h.Get, mid.Authenticate(cfg.Auth), mid.Authorize(cfg.Auth, auth.RuleUserOnly))
 	app.Handle("POST /register", h.RegisterUser)
 	app.Handle("POST /login", h.LoginUser)
 
 	ph := postgrp.New(cfg.PostCore, cfg.Auth, cfg.UserCore)
 
 	app.Handle("POST /posts", ph.Post, mid.Authenticate(cfg.Auth), mid.Authorize(cfg.Auth, auth.RuleAny))
-	app.Handle("GET /posts", ph.GetUsersPost, mid.Authenticate(cfg.Auth), mid.Authorize(cfg.Auth, auth.RuleAny))
+	app.Handle("GET /posts", ph.GetUserPosts, mid.Authenticate(cfg.Auth), mid.Authorize(cfg.Auth, auth.RuleAny))
 	app.Handle("GET /posts/all", ph.GetAll, mid.Authenticate(cfg.Auth), mid.Authorize(cfg.Auth, auth.RuleAny))
+	app.Handle("GET /posts/{address}", ph.GetPostsByUserAddress, mid.Authenticate(cfg.Auth), mid.Authorize(cfg.Auth, auth.RuleAny))
+	app.Handle("GET /posts/{address}/{index}", ph.GetPostsByUserAddressAndIndex, mid.Authenticate(cfg.Auth), mid.Authorize(cfg.Auth, auth.RuleAny))
 
 	return app
 }

@@ -61,7 +61,7 @@ func (h *Handler) Post(ctx context.Context, w http.ResponseWriter, r *http.Reque
 	return nil
 }
 
-func (h *Handler) GetUsersPost(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+func (h *Handler) GetUserPosts(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 
 	claims := auth.GetClaims(ctx)
 
@@ -80,13 +80,28 @@ func (h *Handler) GetUsersPost(ctx context.Context, w http.ResponseWriter, r *ht
 		v1.NewRequestError(errors.New("post error "+err.Error()), http.StatusNotFound)
 	}
 
-	err = web.Respond(ctx, w, posts, http.StatusAccepted)
+	err = web.Respond(ctx, w, posts, http.StatusOK)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
+func (h *Handler) GetByUserAddressPosts(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+	
+	address  := r.PathValue("address")
+
+	posts, err := h.post.QueryByAddress(ctx, address)
+	if err != nil {
+		v1.NewRequestError(errors.New("post error "+err.Error()), http.StatusNotFound)
+	}
+
+	err = web.Respond(ctx, w, posts, http.StatusOK)
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
 func (h *Handler) GetAll(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 
@@ -95,7 +110,7 @@ func (h *Handler) GetAll(ctx context.Context, w http.ResponseWriter, r *http.Req
 		v1.NewRequestError(errors.New("post error "+err.Error()), http.StatusNotFound)
 	}
 
-	err = web.Respond(ctx, w, posts, http.StatusAccepted)
+	err = web.Respond(ctx, w, posts, http.StatusOK)
 	if err != nil {
 		return err
 	}
