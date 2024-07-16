@@ -89,7 +89,7 @@ func (c *Core) QueryByAddress(ctx context.Context, userAddressHex string) ([]Pos
 
 	address := common.HexToAddress(userAddressHex)
 
-	posts, err := c.postContract.Contract.GetUsersPost(&bind.CallOpts{Context: ctx, Pending: false}, address)
+	posts, err := c.postContract.Contract.GetUsersPost(&bind.CallOpts{Context: ctx}, address)
 	if err != nil {
 		return nil, err
 	}

@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"net/mail"
 	"time"
@@ -23,22 +22,6 @@ type Handler struct {
 
 func New(user *user.Core, auth *auth.Auth) *Handler {
 	return &Handler{user: user, auth: auth}
-}
-
-func (h *Handler) Get(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-
-	/* claims := auth.GetClaims(ctx)
-	if claims.Subject == "" {
-		return v1.NewRequestError(errors.New("missing claims"), http.StatusUnauthorized)
-	} */
-
-	// userId := claims.Subject
-
-	err := web.Respond(ctx, w, nil, http.StatusOK)
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 func (h *Handler) RegisterUser(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
@@ -89,7 +72,7 @@ func (h *Handler) LoginUser(ctx context.Context, w http.ResponseWriter, r *http.
 
 	err := json.NewDecoder(r.Body).Decode(&credentials)
 	if err != nil {
-		return v1.NewRequestError(errors.New("Decode error "+err.Error()), http.StatusBadRequest)
+		return v1.NewRequestError(errors.New("decode error "+err.Error()), http.StatusBadRequest)
 	}
 
 	// Parse email address
@@ -97,8 +80,6 @@ func (h *Handler) LoginUser(ctx context.Context, w http.ResponseWriter, r *http.
 	if err != nil {
 		return v1.NewRequestError(errors.New("invalid email address"), http.StatusBadRequest)
 	}
-
-	fmt.Println(string(credentials.Password) + "                  ---             ")
 
 	h.user.Authenticate(ctx, *emailAddr, credentials.Password)
 

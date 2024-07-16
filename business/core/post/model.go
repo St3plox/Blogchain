@@ -2,6 +2,7 @@ package post
 
 import (
 	"math/big"
+	"reflect"
 
 	"github.com/ethereum/go-ethereum/common"
 )
@@ -29,3 +30,6 @@ type NewPost struct {
 	Category  Category
 }
 
+func (p Post) IsEmpty() bool {
+    return reflect.DeepEqual(p, Post{})
+}

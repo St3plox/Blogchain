@@ -146,11 +146,6 @@ func run(log *zerolog.Logger) error {
 		return err
 	}
 
-	// contractAddress, err := contract.GetAddress("PostStorage")
-	// if err != nil {
-	// 	return err
-	// }
-
 	log.Debug().Msg("contract address" + contractAddress.Hex())
 	//Post in blockchain support
 	postContract, err := contract.NewPostContract(ethclient.Client, instance)
