@@ -34,7 +34,7 @@ func NewStore(log *zerolog.Logger, client *mongo.Client) *Store {
 
 // NOTE: add email verification in the future
 func (s *Store) Create(ctx context.Context, usr user.User) error {
-	// Check if the username already exists
+
 	usernameFilter := bson.M{"name": usr.Name}
 	usernameCount, err := s.collection.CountDocuments(ctx, usernameFilter)
 	if err != nil {
@@ -131,7 +131,7 @@ func (s *Store) Count(ctx context.Context, filter user.QueryFilter) (int, error)
 }
 
 func (s *Store) QueryByID(ctx context.Context, userID uuid.UUID) (user.User, error) {
-	filter := bson.M{"_id": userID}
+	filter := bson.M{"id": userID}
 
 	var usr user.User
 	err := s.collection.FindOne(ctx, filter).Decode(&usr)

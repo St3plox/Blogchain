@@ -10,8 +10,9 @@
     "@nomiclabs/hardhat-ethers": "^2.2.3",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
     "chai": "^4.4.1",
-    "ethers": "^5.4.0",
-    "hardhat": "^2.6.4",
+    "ethers": "^5.7.2",
+    "hardhat": "^2.22.6",
+    "hardhat-abigen": "^1.1.4",
     "waffle": "^0.0.4"
   }
 }

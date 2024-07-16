@@ -8,7 +8,7 @@ import (
 
 type Client struct {
 	netUrl string
-	client *ethclient.Client
+	Client *ethclient.Client
 }
 
 func NewClient(rawurl string) (*Client, error) {
@@ -18,5 +18,5 @@ func NewClient(rawurl string) (*Client, error) {
 		return nil, fmt.Errorf("error setablishing connection: %e", err)
 	}
 
-	return &Client{netUrl: rawurl, client: client}, nil
+	return &Client{netUrl: rawurl, Client: client}, nil
 }

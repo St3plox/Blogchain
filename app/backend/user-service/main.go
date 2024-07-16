@@ -12,10 +12,16 @@ import (
 	defaultLog "log"
 
 	"github.com/St3plox/Blogchain/app/backend/user-service/handlers"
+	"github.com/St3plox/Blogchain/business/core/post"
 	"github.com/St3plox/Blogchain/business/core/user"
 	"github.com/St3plox/Blogchain/business/core/user/userdb"
+
+	contractAuth "github.com/St3plox/Blogchain/foundation/blockchain/auth"
+
 	"github.com/St3plox/Blogchain/business/web/auth"
 	"github.com/St3plox/Blogchain/business/web/v1/debug"
+	"github.com/St3plox/Blogchain/foundation/blockchain"
+	"github.com/St3plox/Blogchain/foundation/blockchain/contract"
 	"github.com/St3plox/Blogchain/foundation/keystore"
 	"github.com/St3plox/Blogchain/foundation/logger"
 	"github.com/ardanlabs/conf/v3"
@@ -113,11 +119,46 @@ func run(log *zerolog.Logger) error {
 		return err
 	}
 
+	ethclient, err := blockchain.NewClient("http://127.0.0.1:8545")
+	if err != nil {
+		return fmt.Errorf("error creating eth client %e", err)
+	}
+
 	userStore := userdb.NewStore(log, client)
-	userCore, err := user.NewCore(userStore, "http://127.0.0.1:8545/")
+	userCore, err := user.NewCore(userStore, ethclient)
 	if err != nil {
 		return err
 	}
+
+	err = contract.LoadConfig("contracts/cfg/deployedContracts.json")
+	if err != nil {
+		return err
+	}
+
+	admin, err := contractAuth.NewAdmin("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80", ethclient.Client)
+	cAuth, err := admin.GenerateAuth(ctx)
+	if err != nil {
+		return err
+	}
+
+	contractAddress, _, instance, err := contract.DeployContract(cAuth, ethclient.Client)
+	if err != nil {
+		return err
+	}
+
+	// contractAddress, err := contract.GetAddress("PostStorage")
+	// if err != nil {
+	// 	return err
+	// }
+
+	log.Debug().Msg("contract address" + contractAddress.Hex())
+	//Post in blockchain support
+	postContract, err := contract.NewPostContract(ethclient.Client, instance)
+	if err != nil {
+		return err
+	}
+
+	postCore := post.NewCore(postContract, admin)
 
 	// -------------------------------------------------------------------------
 	// Initialize authentication support
@@ -159,6 +200,8 @@ func run(log *zerolog.Logger) error {
 		}
 	}()
 
+	//initial
+
 	// -------------------------------------------------------------------------
 	// Start API Service
 
@@ -169,6 +212,7 @@ func run(log *zerolog.Logger) error {
 		Log:      log,
 		Auth:     auth,
 		UserCore: userCore,
+		PostCore: postCore,
 	})
 
 	errorLogger := zerolog.New(os.Stderr).With().Timestamp().Logger()

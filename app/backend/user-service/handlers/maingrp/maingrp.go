@@ -1,7 +1,6 @@
 package maingrp
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -60,12 +59,9 @@ func (h *Handler) RegisterUser(ctx context.Context, w http.ResponseWriter, r *ht
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
 			Subject:   usr.ID.String(),
-			
 		},
 		Roles: usr.Roles,
 	}
-
-	fmt.Println(usr.Roles)
 
 	token, err := h.auth.GenerateToken("private_key", claims)
 	if err != nil {
@@ -75,7 +71,7 @@ func (h *Handler) RegisterUser(ctx context.Context, w http.ResponseWriter, r *ht
 	// Set JWT token in response header
 	w.Header().Set("Authorization", "Bearer "+token)
 
-	err = web.Respond(ctx, w, usr.Name, http.StatusCreated)
+	err = web.Respond(ctx, w, usr, http.StatusCreated)
 	if err != nil {
 		h.user.Delete(ctx, usr)
 		return err
@@ -85,9 +81,10 @@ func (h *Handler) RegisterUser(ctx context.Context, w http.ResponseWriter, r *ht
 }
 
 func (h *Handler) LoginUser(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+
 	var credentials struct {
-		Email          string `json:"email"`
-		HashedPassword []byte `json:"hashed_password"`
+		Email    string `json:"email"`
+		Password string `json:"password"`
 	}
 
 	err := json.NewDecoder(r.Body).Decode(&credentials)
@@ -101,25 +98,23 @@ func (h *Handler) LoginUser(ctx context.Context, w http.ResponseWriter, r *http.
 		return v1.NewRequestError(errors.New("invalid email address"), http.StatusBadRequest)
 	}
 
+	fmt.Println(string(credentials.Password) + "                  ---             ")
+
+	h.user.Authenticate(ctx, *emailAddr, credentials.Password)
+
 	usr, err := h.user.QueryByEmail(ctx, *emailAddr)
 	if err != nil {
 		return v1.NewRequestError(errors.New("user not found"), http.StatusNotFound)
 	}
 
 	// Verify password
-	if !bytes.Equal(usr.HashedPassword, credentials.HashedPassword) {
-		return v1.NewRequestError(errors.New("invalid password"), http.StatusUnauthorized)
-	}
-
 	claims := auth.Claims{
 		RegisteredClaims: jwt.RegisteredClaims{
-			Subject: usr.ID.String(),
+			Subject:   usr.ID.String(),
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
 		},
 		Roles: usr.Roles,
 	}
-
-	fmt.Println(usr.Roles)
 
 	token, err := h.auth.GenerateToken("private_key", claims)
 	if err != nil {

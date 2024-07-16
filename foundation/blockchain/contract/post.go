@@ -1,25 +1,19 @@
 package contract
 
 import (
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
 type PostContract struct {
-	client   *ethclient.Client
+	Client   *ethclient.Client
 	Contract *Contract
 }
 
-func NewPostContract(client *ethclient.Client, contractAddress string) (*PostContract, error) {
-
-	address := common.HexToAddress(contractAddress)
-	instance, err := NewContract(address, client)
-	if err != nil {
-		return nil, err
-	}
+func NewPostContract(client *ethclient.Client, instance *Contract) (*PostContract, error) {
 
 	return &PostContract{
-		client:   client,
+		Client:   client,
 		Contract: instance,
 	}, nil
+
 }
