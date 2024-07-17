@@ -59,7 +59,7 @@ func (c *Client) isAvailable(addressHex string) (bool, error) {
 	address := common.HexToAddress(addressHex)
 
 	// Check if the address has associated code (indicating it may be a contract)
-	bytecode, err := c.client.CodeAt(context.Background(), address, nil) // nil is the latest block
+	bytecode, err := c.Client.CodeAt(context.Background(), address, nil) // nil is the latest block
 	if err != nil {
 		return false, fmt.Errorf("failed to get code: %v", err)
 	}
@@ -71,7 +71,7 @@ func (c *Client) isAvailable(addressHex string) (bool, error) {
 	query := ethereum.FilterQuery{
 		Addresses: []common.Address{address},
 	}
-	logs, err := c.client.FilterLogs(context.Background(), query)
+	logs, err := c.Client.FilterLogs(context.Background(), query)
 	if err != nil {
 		return false, fmt.Errorf("failed to get logs: %v", err)
 	}

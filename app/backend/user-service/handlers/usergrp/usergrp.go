@@ -1,11 +1,9 @@
-package maingrp
+package usergrp
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"net/mail"
 	"time"
@@ -26,22 +24,6 @@ func New(user *user.Core, auth *auth.Auth) *Handler {
 	return &Handler{user: user, auth: auth}
 }
 
-func (h *Handler) Get(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-
-	/* claims := auth.GetClaims(ctx)
-	if claims.Subject == "" {
-		return v1.NewRequestError(errors.New("missing claims"), http.StatusUnauthorized)
-	} */
-
-	// userId := claims.Subject
-
-	err := web.Respond(ctx, w, nil, http.StatusOK)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 func (h *Handler) RegisterUser(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 
 	var nu user.NewUser
@@ -60,12 +42,9 @@ func (h *Handler) RegisterUser(ctx context.Context, w http.ResponseWriter, r *ht
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
 			Subject:   usr.ID.String(),
-			
 		},
 		Roles: usr.Roles,
 	}
-
-	fmt.Println(usr.Roles)
 
 	token, err := h.auth.GenerateToken("private_key", claims)
 	if err != nil {
@@ -75,7 +54,7 @@ func (h *Handler) RegisterUser(ctx context.Context, w http.ResponseWriter, r *ht
 	// Set JWT token in response header
 	w.Header().Set("Authorization", "Bearer "+token)
 
-	err = web.Respond(ctx, w, usr.Name, http.StatusCreated)
+	err = web.Respond(ctx, w, user.Map(usr), http.StatusCreated)
 	if err != nil {
 		h.user.Delete(ctx, usr)
 		return err
@@ -85,14 +64,12 @@ func (h *Handler) RegisterUser(ctx context.Context, w http.ResponseWriter, r *ht
 }
 
 func (h *Handler) LoginUser(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-	var credentials struct {
-		Email          string `json:"email"`
-		HashedPassword []byte `json:"hashed_password"`
-	}
+
+	var credentials user.UserCredentials
 
 	err := json.NewDecoder(r.Body).Decode(&credentials)
 	if err != nil {
-		return v1.NewRequestError(errors.New("Decode error "+err.Error()), http.StatusBadRequest)
+		return v1.NewRequestError(errors.New("decode error "+err.Error()), http.StatusBadRequest)
 	}
 
 	// Parse email address
@@ -101,25 +78,21 @@ func (h *Handler) LoginUser(ctx context.Context, w http.ResponseWriter, r *http.
 		return v1.NewRequestError(errors.New("invalid email address"), http.StatusBadRequest)
 	}
 
+	h.user.Authenticate(ctx, *emailAddr, credentials.Password)
+
 	usr, err := h.user.QueryByEmail(ctx, *emailAddr)
 	if err != nil {
 		return v1.NewRequestError(errors.New("user not found"), http.StatusNotFound)
 	}
 
 	// Verify password
-	if !bytes.Equal(usr.HashedPassword, credentials.HashedPassword) {
-		return v1.NewRequestError(errors.New("invalid password"), http.StatusUnauthorized)
-	}
-
 	claims := auth.Claims{
 		RegisteredClaims: jwt.RegisteredClaims{
-			Subject: usr.ID.String(),
+			Subject:   usr.ID.String(),
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
 		},
 		Roles: usr.Roles,
 	}
-
-	fmt.Println(usr.Roles)
 
 	token, err := h.auth.GenerateToken("private_key", claims)
 	if err != nil {
@@ -130,15 +103,8 @@ func (h *Handler) LoginUser(ctx context.Context, w http.ResponseWriter, r *http.
 	w.Header().Set("Authorization", "Bearer "+token)
 
 	// Respond with user information (excluding sensitive data like password hash)
-	respondUser := struct {
-		ID    string `json:"id"`
-		Email string `json:"email"`
-	}{
-		ID:    usr.ID.String(),
-		Email: usr.Email,
-	}
 
-	err = web.Respond(ctx, w, respondUser, http.StatusOK)
+	err = web.Respond(ctx, w, user.Map(usr), http.StatusOK)
 	if err != nil {
 		return err
 	}

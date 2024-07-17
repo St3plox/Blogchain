@@ -34,7 +34,7 @@ func NewStore(log *zerolog.Logger, client *mongo.Client) *Store {
 
 // NOTE: add email verification in the future
 func (s *Store) Create(ctx context.Context, usr user.User) error {
-	// Check if the username already exists
+
 	usernameFilter := bson.M{"name": usr.Name}
 	usernameCount, err := s.collection.CountDocuments(ctx, usernameFilter)
 	if err != nil {
@@ -65,7 +65,7 @@ func (s *Store) Create(ctx context.Context, usr user.User) error {
 }
 
 func (s *Store) Update(ctx context.Context, usr user.User) error {
-	filter := bson.M{"_id": usr.ID}
+	filter := bson.M{"id": usr.ID}
 	update := bson.M{"$set": usr}
 
 	_, err := s.collection.UpdateOne(ctx, filter, update)
@@ -76,7 +76,7 @@ func (s *Store) Update(ctx context.Context, usr user.User) error {
 }
 
 func (s *Store) Delete(ctx context.Context, usr user.User) error {
-	filter := bson.M{"_id": usr.ID}
+	filter := bson.M{"id": usr.ID}
 
 	_, err := s.collection.DeleteOne(ctx, filter)
 	if err != nil {
@@ -91,7 +91,7 @@ func (s *Store) Query(ctx context.Context, filter user.QueryFilter, orderBy orde
 	if orderBy.Direction == order.DESC {
 		sortOrder = -1
 	}
-	findOptions.SetSort(bson.D{{orderBy.Field, sortOrder}})
+	findOptions.SetSort(bson.D{{Key: orderBy.Field, Value: sortOrder}})
 	findOptions.SetSkip(int64((pageNumber - 1) * rowsPerPage))
 	findOptions.SetLimit(int64(rowsPerPage))
 
@@ -131,7 +131,7 @@ func (s *Store) Count(ctx context.Context, filter user.QueryFilter) (int, error)
 }
 
 func (s *Store) QueryByID(ctx context.Context, userID uuid.UUID) (user.User, error) {
-	filter := bson.M{"_id": userID}
+	filter := bson.M{"id": userID}
 
 	var usr user.User
 	err := s.collection.FindOne(ctx, filter).Decode(&usr)

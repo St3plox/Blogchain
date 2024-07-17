@@ -39,9 +39,18 @@ stop:
 run-tests:
 	go test ./foundation/blockchain 
 
+launch-hardhat:
+	npx hardhat node
+
 launch-mongo:
 	docker run -d -p 27017:27017 --name mongodb mongodb/mongodb-community-server:6.0-ubi8
 
 stop-mongo:
 	docker stop mongodb
 	docker rm mongodb
+
+solc-compile:
+	 solc --overwrite --abi --bin -o contracts/bin contracts/PostStorage.sol
+
+generate-contract:
+	abigen --abi=contracts/bin/PostStorage.abi --bin=contracts/bin/PostStorage.bin --pkg=contract --out=foundation/blockchain/contract/post_storage.go

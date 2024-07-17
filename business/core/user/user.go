@@ -39,21 +39,16 @@ type Core struct {
 }
 
 // NewCore constructs a core for user api access.
-func NewCore(storer Storer, netUrl string) (*Core, error) {
-
-	ethclient, err := blockchain.NewClient(netUrl)
-	if err != nil {
-		return nil, fmt.Errorf("error creating eth client %e", err)
-	}
+func NewCore(storer Storer, ethClient *blockchain.Client) (*Core, error) {
 
 	return &Core{
 		storer:    storer,
-		ethClient: ethclient,
+		ethClient: ethClient,
 	}, nil
 }
 
-// Create inserts a new user into the database.
 func (c *Core) Create(ctx context.Context, nu NewUser) (User, error) {
+// Create inserts a new user into the database.
 
 	account, err := c.ethClient.CreateEthAccount()
 	if err != nil {
@@ -68,19 +63,24 @@ func (c *Core) Create(ctx context.Context, nu NewUser) (User, error) {
 		return User{}, fmt.Errorf("create : %w", err)
 	}
 
+	passwordHash, err := bcrypt.GenerateFromPassword(nu.Password, 16)
+	if err != nil {
+		return User{}, fmt.Errorf("create : %w", err)
+	}
+
 	// TODO: Private key encryption
 	user := User{
-		ID:             uuid.New(),
-		Name:           nu.Name,
-		Email:          nu.Email,
-		HashedPassword: nu.PasswordHash,
-		Roles:          roles,
-		DateCreated:    now,
-		DateUpdated:    now,
-		PublicKey:      account.PublicKey,
-		PrivateKey:     account.PrivateKey,
-		SecretKey:      secretKey,
-		AddressHex:     account.AddressHex,
+		ID:           uuid.New(),
+		Name:         nu.Name,
+		Email:        nu.Email,
+		PasswordHash: passwordHash,
+		Roles:        roles,
+		DateCreated:  now,
+		DateUpdated:  now,
+		PublicKey:    account.PublicKey,
+		PrivateKey:   account.PrivateKey,
+		SecretKey:    secretKey,
+		AddressHex:   account.AddressHex,
 	}
 
 	if err := c.storer.Create(ctx, user); err != nil {
@@ -155,7 +155,7 @@ func (c *Core) Authenticate(ctx context.Context, email mail.Address, password st
 		return User{}, fmt.Errorf("query: email[%s]: %w", email, err)
 	}
 
-	if err := bcrypt.CompareHashAndPassword(usr.HashedPassword, []byte(password)); err != nil {
+	if err := bcrypt.CompareHashAndPassword(usr.PasswordHash, []byte(password)); err != nil {
 		return User{}, fmt.Errorf("comparehashandpassword: %w", ErrAuthenticationFailure)
 	}
 
