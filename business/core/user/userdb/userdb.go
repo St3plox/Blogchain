@@ -65,7 +65,7 @@ func (s *Store) Create(ctx context.Context, usr user.User) error {
 }
 
 func (s *Store) Update(ctx context.Context, usr user.User) error {
-	filter := bson.M{"_id": usr.ID}
+	filter := bson.M{"id": usr.ID}
 	update := bson.M{"$set": usr}
 
 	_, err := s.collection.UpdateOne(ctx, filter, update)
@@ -76,7 +76,7 @@ func (s *Store) Update(ctx context.Context, usr user.User) error {
 }
 
 func (s *Store) Delete(ctx context.Context, usr user.User) error {
-	filter := bson.M{"_id": usr.ID}
+	filter := bson.M{"id": usr.ID}
 
 	_, err := s.collection.DeleteOne(ctx, filter)
 	if err != nil {
