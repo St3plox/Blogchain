@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"math/big"
 	"strconv"
 
 	"net/http"
@@ -120,7 +121,7 @@ func (h *Handler) GetPostsByUserAddressAndIndex(ctx context.Context, w http.Resp
 		return v1.NewRequestError(errors.New("parse error "+err.Error()), http.StatusInternalServerError)
 	}
 
-	post, err := h.post.GetPostByIndex(ctx, address, index)
+	post, err := h.post.QueryByIndex(ctx, address, index)
 	if err != nil {
 		return v1.NewRequestError(errors.New("get error "+err.Error()), http.StatusNotFound)
 	}
@@ -139,6 +140,52 @@ func (h *Handler) GetPostsByUserAddressAndIndex(ctx context.Context, w http.Resp
 func (h *Handler) GetAll(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 
 	posts, err := h.post.GetAllPostsSorted(ctx)
+	if err != nil {
+		return v1.NewRequestError(errors.New("get error "+err.Error()), http.StatusNotFound)
+	}
+
+	err = web.Respond(ctx, w, posts, http.StatusOK)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (h *Handler) GetById(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+
+	idStr := r.PathValue("id")
+	id, success := new(big.Int).SetString(idStr, 10)
+	if !success {
+		return v1.NewRequestError(errors.New("id parse error"), http.StatusInternalServerError)
+	}
+
+	post, err := h.post.GetPostByID(ctx, id)
+	if err != nil {
+		return v1.NewRequestError(errors.New("get error "+err.Error()), http.StatusNotFound)
+	}
+
+	err = web.Respond(ctx, w, post, http.StatusOK)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (h *Handler) GetAllPagineted(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+
+	pageStr := r.PathValue("page")
+	page, err := strconv.ParseUint(pageStr, 10, 64)
+	if err != nil {
+		return v1.NewRequestError(errors.New("page parse error"), http.StatusInternalServerError)
+	}
+
+	pageSizeStr := r.PathValue("pageSize")
+	pageSize, err := strconv.ParseUint(pageSizeStr, 10, 64)
+	if err != nil {
+		return v1.NewRequestError(errors.New("pageSize parse error"), http.StatusInternalServerError)
+	}
+
+	posts, err := h.post.Query(ctx, page, pageSize)
 	if err != nil {
 		return v1.NewRequestError(errors.New("get error "+err.Error()), http.StatusNotFound)
 	}

@@ -41,7 +41,6 @@ func main() {
 	}
 }
 
-// TODO: cfg for contract support
 func run(log *zerolog.Logger) error {
 
 	// -------------------------------------------------------------------------

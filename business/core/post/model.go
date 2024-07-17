@@ -15,8 +15,8 @@ const (
 	Article
 )
 
-
 type Post struct {
+	ID        *big.Int
 	Author    common.Address
 	Title     string
 	Content   string
@@ -25,11 +25,11 @@ type Post struct {
 }
 
 type NewPost struct {
-	Title     string
-	Content   string
-	Category  Category
+	Title    string
+	Content  string
+	Category Category
 }
 
 func (p Post) IsEmpty() bool {
-    return reflect.DeepEqual(p, Post{})
+	return reflect.DeepEqual(p, Post{})
 }
