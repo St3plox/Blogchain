@@ -91,7 +91,7 @@ func (s *Store) Query(ctx context.Context, filter user.QueryFilter, orderBy orde
 	if orderBy.Direction == order.DESC {
 		sortOrder = -1
 	}
-	findOptions.SetSort(bson.D{{orderBy.Field, sortOrder}})
+	findOptions.SetSort(bson.D{{Key: orderBy.Field, Value: sortOrder}})
 	findOptions.SetSkip(int64((pageNumber - 1) * rowsPerPage))
 	findOptions.SetLimit(int64(rowsPerPage))
 
