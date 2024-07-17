@@ -33,7 +33,7 @@ import (
 var build = "develop"
 
 func main() {
-	log := logger.New("GATEWAY - SERVICE")
+	log := logger.New("BACKEND - SERVICE")
 
 	if err := run(log); err != nil {
 		log.Error().Err(err).Msg("startup")
@@ -41,6 +41,7 @@ func main() {
 	}
 }
 
+// TODO: cfg for contract support
 func run(log *zerolog.Logger) error {
 
 	// -------------------------------------------------------------------------
@@ -71,6 +72,11 @@ func run(log *zerolog.Logger) error {
 		DB struct {
 			Uri string `conf:"default:mongodb://localhost:27017"`
 		}
+		ETH struct {
+			Rawurl   string `conf:"default:http://127.0.0.1:8545"`
+			AdminKey string `conf:"default:0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"`
+		} // NOTE: AdminKey was taken from hardhat network. These accounts, and their private keys, are publicly known.
+		//Any funds sent to them on Mainnet or any other live network WILL BE LOST.
 	}{
 		Version: conf.Version{
 			Build: build,
@@ -119,7 +125,10 @@ func run(log *zerolog.Logger) error {
 		return err
 	}
 
-	ethclient, err := blockchain.NewClient("http://127.0.0.1:8545")
+	// -------------------------------------------------------------------------
+	//ETH client supoport
+
+	ethclient, err := blockchain.NewClient(cfg.ETH.Rawurl)
 	if err != nil {
 		return fmt.Errorf("error creating eth client %e", err)
 	}
@@ -130,24 +139,22 @@ func run(log *zerolog.Logger) error {
 		return err
 	}
 
-	err = contract.LoadConfig("contracts/cfg/deployedContracts.json")
+	admin, err := contractAuth.NewAdmin(cfg.ETH.AdminKey, ethclient.Client)
 	if err != nil {
-		return err
+		return fmt.Errorf("error creating admin %e", err)
 	}
-
-	admin, err := contractAuth.NewAdmin("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80", ethclient.Client)
 	cAuth, err := admin.GenerateAuth(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("error creating auth %e", err)
 	}
 
-	contractAddress, _, instance, err := contract.DeployContract(cAuth, ethclient.Client)
+	postContractAddress, _, instance, err := contract.DeployContract(cAuth, ethclient.Client)
 	if err != nil {
-		return err
+		return fmt.Errorf("error creating post contract %e", err)
 	}
 
-	log.Debug().Msg("contract address" + contractAddress.Hex())
-	//Post in blockchain support
+	log.Info().Str("status", "startup").Msg("deployed contract with address" + postContractAddress.Hex())
+
 	postContract, err := contract.NewPostContract(ethclient.Client, instance)
 	if err != nil {
 		return err
