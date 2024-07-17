@@ -66,6 +66,26 @@ contract PostStorage {
         return userPosts[user];
     }
 
+     function getUsersPostPaginated(address user, uint256 page, uint256 pageSize) public view returns (Post[] memory) {
+        uint256 totalPosts = userPosts[user].length;
+        uint256 start = page * pageSize;
+        uint256 end = start + pageSize;
+
+        if (end > totalPosts) {
+            end = totalPosts;
+        }
+
+        require(start < totalPosts, "Page out of range");
+
+        Post[] memory paginatedPosts = new Post[](end - start);
+        for (uint256 i = start; i < end; i++) {
+            paginatedPosts[i - start] = userPosts[user][i];
+        }
+
+        return paginatedPosts;
+    }
+
+
     function getPostByIndex(
         address user,
         uint256 index
