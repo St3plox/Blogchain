@@ -5,9 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"math/big"
-	"strconv"
-
 	"net/http"
+	"strconv"
 
 	"github.com/St3plox/Blogchain/business/core/post"
 	"github.com/St3plox/Blogchain/business/core/user"
@@ -32,13 +31,11 @@ func New(postCore *post.Core, auth *auth.Auth, userCore *user.Core) *Handler {
 }
 
 func (h *Handler) Post(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-
 	var np post.NewPost
 	err := json.NewDecoder(r.Body).Decode(&np)
 	if err != nil {
 		return v1.NewRequestError(errors.New("decode error "+err.Error()), http.StatusInternalServerError)
 	}
-
 	claims := auth.GetClaims(ctx)
 
 	id, err := uuid.Parse(claims.Subject)
@@ -64,8 +61,12 @@ func (h *Handler) Post(ctx context.Context, w http.ResponseWriter, r *http.Reque
 }
 
 func (h *Handler) GetUserPosts(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-
 	claims := auth.GetClaims(ctx)
+
+	page, pageSize, err := extractPaginationParams(r)
+	if err != nil {
+		return v1.NewRequestError(err, http.StatusBadRequest)
+	}
 
 	id, err := uuid.Parse(claims.Subject)
 	if err != nil {
@@ -77,13 +78,13 @@ func (h *Handler) GetUserPosts(ctx context.Context, w http.ResponseWriter, r *ht
 		return v1.NewRequestError(errors.New("user error "+err.Error()), http.StatusNotFound)
 	}
 
-	posts, err := h.post.QueryByAddress(ctx, usr.AddressHex)
+	posts, err := h.post.QueryByAddress(ctx, usr.AddressHex, page, pageSize)
 	if err != nil {
 		return v1.NewRequestError(errors.New("query error "+err.Error()), http.StatusInternalServerError)
 	}
 
 	if posts == nil {
-		return v1.NewRequestError(errors.New("querry error "), http.StatusNotFound)
+		return v1.NewRequestError(errors.New("query error"), http.StatusNotFound)
 	}
 
 	err = web.Respond(ctx, w, posts, http.StatusOK)
@@ -94,16 +95,20 @@ func (h *Handler) GetUserPosts(ctx context.Context, w http.ResponseWriter, r *ht
 }
 
 func (h *Handler) GetPostsByUserAddress(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+	address := r.URL.Query().Get("address")
 
-	address := r.PathValue("address")
+	page, pageSize, err := extractPaginationParams(r)
+	if err != nil {
+		return v1.NewRequestError(err, http.StatusBadRequest)
+	}
 
-	posts, err := h.post.QueryByAddress(ctx, address)
+	posts, err := h.post.QueryByAddress(ctx, address, page, pageSize)
 	if err != nil {
 		return v1.NewRequestError(errors.New("post error "+err.Error()), http.StatusInternalServerError)
 	}
 
 	if posts == nil {
-		return v1.NewRequestError(errors.New("post error "), http.StatusNotFound)
+		return v1.NewRequestError(errors.New("post error"), http.StatusNotFound)
 	}
 
 	err = web.Respond(ctx, w, posts, http.StatusOK)
@@ -114,7 +119,6 @@ func (h *Handler) GetPostsByUserAddress(ctx context.Context, w http.ResponseWrit
 }
 
 func (h *Handler) GetPostsByUserAddressAndIndex(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-
 	address := r.PathValue("address")
 	index, err := strconv.ParseUint(r.PathValue("index"), 10, 64)
 	if err != nil {
@@ -127,7 +131,7 @@ func (h *Handler) GetPostsByUserAddressAndIndex(ctx context.Context, w http.Resp
 	}
 
 	if post.IsEmpty() {
-		return v1.NewRequestError(errors.New("get error "), http.StatusNotFound)
+		return v1.NewRequestError(errors.New("get error"), http.StatusNotFound)
 	}
 
 	err = web.Respond(ctx, w, post, http.StatusOK)
@@ -137,22 +141,7 @@ func (h *Handler) GetPostsByUserAddressAndIndex(ctx context.Context, w http.Resp
 	return nil
 }
 
-func (h *Handler) GetAll(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-
-	posts, err := h.post.GetAllPostsSorted(ctx)
-	if err != nil {
-		return v1.NewRequestError(errors.New("get error "+err.Error()), http.StatusNotFound)
-	}
-
-	err = web.Respond(ctx, w, posts, http.StatusOK)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 func (h *Handler) GetById(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-
 	idStr := r.PathValue("id")
 	id, success := new(big.Int).SetString(idStr, 10)
 	if !success {
@@ -171,18 +160,10 @@ func (h *Handler) GetById(ctx context.Context, w http.ResponseWriter, r *http.Re
 	return nil
 }
 
-func (h *Handler) GetAllPagineted(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-
-	pageStr := r.PathValue("page")
-	page, err := strconv.ParseUint(pageStr, 10, 64)
+func (h *Handler) GetAll(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+	page, pageSize, err := extractPaginationParams(r)
 	if err != nil {
-		return v1.NewRequestError(errors.New("page parse error"), http.StatusInternalServerError)
-	}
-
-	pageSizeStr := r.PathValue("pageSize")
-	pageSize, err := strconv.ParseUint(pageSizeStr, 10, 64)
-	if err != nil {
-		return v1.NewRequestError(errors.New("pageSize parse error"), http.StatusInternalServerError)
+		return v1.NewRequestError(err, http.StatusBadRequest)
 	}
 
 	posts, err := h.post.Query(ctx, page, pageSize)
@@ -195,4 +176,23 @@ func (h *Handler) GetAllPagineted(ctx context.Context, w http.ResponseWriter, r 
 		return err
 	}
 	return nil
+}
+
+func extractPaginationParams(r *http.Request) (uint64, uint64, error) {
+	const defaultPage uint64 = 0
+	const defaultPageSize uint64 = 100
+
+	pageStr := r.URL.Query().Get("page")
+	page, err := strconv.ParseUint(pageStr, 10, 64)
+	if err != nil || pageStr == "" {
+		page = defaultPage
+	}
+
+	pageSizeStr := r.URL.Query().Get("pageSize")
+	pageSize, err := strconv.ParseUint(pageSizeStr, 10, 64)
+	if err != nil || pageSizeStr == "" {
+		pageSize = defaultPageSize
+	}
+
+	return page, pageSize, nil
 }

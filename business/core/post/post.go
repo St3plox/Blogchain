@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"math/big"
-	"sort"
 
 	"github.com/St3plox/Blogchain/foundation/blockchain/auth"
 	"github.com/St3plox/Blogchain/foundation/blockchain/contract"
@@ -26,11 +25,10 @@ func NewCore(postContract *contract.PostContract, admin *auth.Admin) *Core {
 
 type Storer interface {
 	Create(ctx context.Context, np NewPost, userAddressHex string) (Post, error)
-	QueryByAddress(ctx context.Context, userAddressHex string) ([]Post, error)
-	QueryByIndex(ctx context.Context, userAddressHex string, index uint64) (Post, error)
-	QueryAllSorted(ctx context.Context) ([]Post, error)
-	QueryById(ctx context.Context, id *big.Int) (Post, error)
 	Query(ctx context.Context, page uint64, pageSize uint64) ([]Post, error)
+	QueryByAddress(ctx context.Context, userAddressHex string, page uint64, pageSize uint64) ([]Post, error)
+	QueryByIndex(ctx context.Context, userAddressHex string, index uint64) (Post, error)
+	QueryById(ctx context.Context, id *big.Int) (Post, error)
 }
 
 func (c *Core) Create(ctx context.Context, np NewPost, userAddressHex string) (Post, error) {
@@ -81,7 +79,7 @@ func (c *Core) Create(ctx context.Context, np NewPost, userAddressHex string) (P
 	return newPost, nil
 }
 
-func (c *Core) QueryByAddress(ctx context.Context, userAddressHex string) ([]Post, error) {
+func (c *Core) QueryByAddress(ctx context.Context, userAddressHex string, page uint64, pageSize uint64) ([]Post, error) {
 
 	if !common.IsHexAddress(userAddressHex) {
 		return nil, fmt.Errorf("invalid address: %s", userAddressHex)
@@ -89,7 +87,13 @@ func (c *Core) QueryByAddress(ctx context.Context, userAddressHex string) ([]Pos
 
 	address := common.HexToAddress(userAddressHex)
 
-	posts, err := c.postContract.Contract.GetUsersPost(&bind.CallOpts{Context: ctx}, address)
+	posts, err := c.postContract.Contract.GetUsersPostPaginated(
+		&bind.CallOpts{Context: ctx},
+		address,
+		new(big.Int).SetUint64(page),
+		new(big.Int).SetUint64(pageSize),
+	)
+
 	if err != nil {
 		return nil, err
 	}
@@ -125,32 +129,6 @@ func (c *Core) QueryByIndex(ctx context.Context, userAddressHex string, index ui
 		Timestamp: post.Timestamp,
 		Category:  Category(post.Category),
 	}, nil
-}
-
-func (c *Core) GetAllPostsSorted(ctx context.Context) ([]Post, error) {
-	posts, err := c.postContract.Contract.GetAllPosts(&bind.CallOpts{Context: ctx})
-	if err != nil {
-		return nil, err
-	}
-
-	var result []Post
-	for _, post := range posts {
-		result = append(result, Post{
-			ID:        post.Id,
-			Author:    post.Author,
-			Title:     post.Title,
-			Content:   post.Content,
-			Timestamp: post.Timestamp,
-			Category:  Category(post.Category),
-		})
-	}
-
-	// Sort all posts by timestamp in descending order
-	sort.Slice(result, func(i, j int) bool {
-		return result[i].Timestamp.Cmp(result[j].Timestamp) > 0
-	})
-
-	return result, nil
 }
 
 func (c *Core) GetPostByID(ctx context.Context, id *big.Int) (Post, error) {
