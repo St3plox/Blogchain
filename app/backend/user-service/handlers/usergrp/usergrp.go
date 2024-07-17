@@ -103,15 +103,8 @@ func (h *Handler) LoginUser(ctx context.Context, w http.ResponseWriter, r *http.
 	w.Header().Set("Authorization", "Bearer "+token)
 
 	// Respond with user information (excluding sensitive data like password hash)
-	respondUser := struct {
-		ID    string `json:"id"`
-		Email string `json:"email"`
-	}{
-		ID:    usr.ID.String(),
-		Email: usr.Email,
-	}
 
-	err = web.Respond(ctx, w, respondUser, http.StatusOK)
+	err = web.Respond(ctx, w, user.Map(usr), http.StatusOK)
 	if err != nil {
 		return err
 	}

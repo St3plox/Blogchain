@@ -24,10 +24,10 @@ type APIMuxConfig struct {
 func APIMux(cfg APIMuxConfig) *web.App {
 	app := web.NewApp(cfg.Shutdown, mid.Logger(cfg.Log), mid.Errors(cfg.Log), mid.Panics())
 
-	h := usergrp.New(cfg.UserCore, cfg.Auth)
+	uh := usergrp.New(cfg.UserCore, cfg.Auth)
 
-	app.Handle("POST /register", h.RegisterUser)
-	app.Handle("POST /login", h.LoginUser)
+	app.Handle("POST /users/register", uh.RegisterUser)
+	app.Handle("POST /users/login", uh.LoginUser)
 
 	ph := postgrp.New(cfg.PostCore, cfg.Auth, cfg.UserCore)
 
