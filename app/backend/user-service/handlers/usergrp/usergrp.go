@@ -1,4 +1,4 @@
-package maingrp
+package usergrp
 
 import (
 	"context"
@@ -54,7 +54,7 @@ func (h *Handler) RegisterUser(ctx context.Context, w http.ResponseWriter, r *ht
 	// Set JWT token in response header
 	w.Header().Set("Authorization", "Bearer "+token)
 
-	err = web.Respond(ctx, w, usr, http.StatusCreated)
+	err = web.Respond(ctx, w, user.Map(usr), http.StatusCreated)
 	if err != nil {
 		h.user.Delete(ctx, usr)
 		return err
@@ -65,10 +65,7 @@ func (h *Handler) RegisterUser(ctx context.Context, w http.ResponseWriter, r *ht
 
 func (h *Handler) LoginUser(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 
-	var credentials struct {
-		Email    string `json:"email"`
-		Password string `json:"password"`
-	}
+	var credentials user.UserCredentials
 
 	err := json.NewDecoder(r.Body).Decode(&credentials)
 	if err != nil {
