@@ -2,12 +2,10 @@ package user
 
 import (
 	"time"
-
-	"github.com/google/uuid"
 )
 
 type User struct {
-	ID           uuid.UUID `json:"id"`
+	ID           string    `json:"id,omitempty" bson:"_id,omitempty"`
 	Name         string    `json:"name"`
 	Email        string    `json:"email"`
 	Roles        []Role    `json:"roles"`
@@ -27,7 +25,7 @@ type NewUser struct {
 }
 
 type UserDTO struct {
-	ID          uuid.UUID `json:"id"`
+	ID          string    `json:"id"`
 	Name        string    `json:"name"`
 	Email       string    `json:"email"`
 	Roles       []Role    `json:"roles"`

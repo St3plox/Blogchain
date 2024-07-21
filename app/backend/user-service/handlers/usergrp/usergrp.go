@@ -35,13 +35,13 @@ func (h *Handler) RegisterUser(ctx context.Context, w http.ResponseWriter, r *ht
 	usr, err := h.user.Create(ctx, nu)
 	if err != nil {
 		h.user.Delete(ctx, usr)
-		return v1.NewRequestError(errors.New("Create error "+err.Error()), http.StatusInternalServerError)
+		return v1.NewRequestError(errors.New("Create error "+err.Error()), http.StatusBadRequest)
 	}
 
 	claims := auth.Claims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
-			Subject:   usr.ID.String(),
+			Subject:   usr.ID,
 		},
 		Roles: usr.Roles,
 	}
@@ -88,7 +88,7 @@ func (h *Handler) LoginUser(ctx context.Context, w http.ResponseWriter, r *http.
 	// Verify password
 	claims := auth.Claims{
 		RegisteredClaims: jwt.RegisteredClaims{
-			Subject:   usr.ID.String(),
+			Subject:   usr.ID,
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
 		},
 		Roles: usr.Roles,
@@ -101,8 +101,6 @@ func (h *Handler) LoginUser(ctx context.Context, w http.ResponseWriter, r *http.
 
 	// Set JWT token in response header
 	w.Header().Set("Authorization", "Bearer "+token)
-
-	// Respond with user information (excluding sensitive data like password hash)
 
 	err = web.Respond(ctx, w, user.Map(usr), http.StatusOK)
 	if err != nil {

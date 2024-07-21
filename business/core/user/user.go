@@ -22,7 +22,7 @@ var (
 )
 
 type Storer interface {
-	Create(ctx context.Context, usr User) error
+	Create(ctx context.Context, usr User) (User, error)
 	Update(ctx context.Context, usr User) error
 	Delete(ctx context.Context, usr User) error
 	Query(ctx context.Context, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]User, error)
@@ -47,8 +47,8 @@ func NewCore(storer Storer, ethClient *blockchain.Client) (*Core, error) {
 	}, nil
 }
 
-func (c *Core) Create(ctx context.Context, nu NewUser) (User, error) {
 // Create inserts a new user into the database.
+func (c *Core) Create(ctx context.Context, nu NewUser) (User, error) {
 
 	account, err := c.ethClient.CreateEthAccount()
 	if err != nil {
@@ -70,7 +70,6 @@ func (c *Core) Create(ctx context.Context, nu NewUser) (User, error) {
 
 	// TODO: Private key encryption
 	user := User{
-		ID:           uuid.New(),
 		Name:         nu.Name,
 		Email:        nu.Email,
 		PasswordHash: passwordHash,
@@ -83,11 +82,12 @@ func (c *Core) Create(ctx context.Context, nu NewUser) (User, error) {
 		AddressHex:   account.AddressHex,
 	}
 
-	if err := c.storer.Create(ctx, user); err != nil {
+	usr, err := c.storer.Create(ctx, user)
+	if err != nil {
 		return User{}, fmt.Errorf("create: %w", err)
 	}
 
-	return user, nil
+	return usr, nil
 }
 
 // Delete removes a user from the database.

@@ -2,7 +2,6 @@ package userdb
 
 import (
 	"context"
-	"errors"
 	"net/mail"
 
 	"github.com/St3plox/Blogchain/business/core/user"
@@ -11,6 +10,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -33,39 +33,21 @@ func NewStore(log *zerolog.Logger, client *mongo.Client) *Store {
 }
 
 // NOTE: add email verification in the future
-func (s *Store) Create(ctx context.Context, usr user.User) error {
-
-	usernameFilter := bson.M{"name": usr.Name}
-	usernameCount, err := s.collection.CountDocuments(ctx, usernameFilter)
-	if err != nil {
-		s.log.Error().Err(err).Msg("mongodb: checking username uniqueness")
-		return err
-	}
-	if usernameCount > 0 {
-		return errors.New("username already exists")
-	}
-
-	// Check if the email already exists
-	emailFilter := bson.M{"email": usr.Email}
-	emailCount, err := s.collection.CountDocuments(ctx, emailFilter)
-	if err != nil {
-		s.log.Error().Err(err).Msg("mongodb: checking email uniqueness")
-		return err
-	}
-	if emailCount > 0 {
-		return errors.New("email already exists")
-	}
-
-	// Insert the new user if both the username and email are unique
-	_, err = s.collection.InsertOne(ctx, usr)
+func (s *Store) Create(ctx context.Context, usr user.User) (user.User, error) {
+	res, err := s.collection.InsertOne(ctx, usr)
 	if err != nil {
 		s.log.Error().Err(err).Msg("mongodb: inserting user")
+		return user.User{}, err
 	}
-	return err
+
+	newUser := &usr
+	newUser.ID = res.InsertedID.(primitive.ObjectID).Hex()
+
+	return *newUser, nil
 }
 
 func (s *Store) Update(ctx context.Context, usr user.User) error {
-	filter := bson.M{"id": usr.ID}
+	filter := bson.M{"_id": usr.ID}
 	update := bson.M{"$set": usr}
 
 	_, err := s.collection.UpdateOne(ctx, filter, update)
@@ -76,7 +58,7 @@ func (s *Store) Update(ctx context.Context, usr user.User) error {
 }
 
 func (s *Store) Delete(ctx context.Context, usr user.User) error {
-	filter := bson.M{"id": usr.ID}
+	filter := bson.M{"_id": usr.ID}
 
 	_, err := s.collection.DeleteOne(ctx, filter)
 	if err != nil {
@@ -131,7 +113,7 @@ func (s *Store) Count(ctx context.Context, filter user.QueryFilter) (int, error)
 }
 
 func (s *Store) QueryByID(ctx context.Context, userID uuid.UUID) (user.User, error) {
-	filter := bson.M{"id": userID}
+	filter := bson.M{"_id": userID}
 
 	var usr user.User
 	err := s.collection.FindOne(ctx, filter).Decode(&usr)
