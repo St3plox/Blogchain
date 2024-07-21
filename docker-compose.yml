@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongodb/mongodb-community-server:6.0-ubi8
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    restart: unless-stopped
+
+  hardhat-node:
+    build:
+      context: .
+      dockerfile: zarf/docker/hardhat/Dockerfile
+    container_name: hardhat-node
+    ports:
+      - "8545:8545"
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: .
+      dockerfile: zarf/docker/Dockerfile
+    container_name: backend
+    ports:
+      - 3000:3000
+    environment:
+      - DB_URI=mongodb://mongodb:27017
+    depends_on:
+      - mongodb
+    restart: unless-stopped
+

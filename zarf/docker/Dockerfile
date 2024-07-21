@@ -1,5 +1,5 @@
-# Use the official Golang image as a base
-FROM golang:1.22 AS build
+# Use the official Golang image with the correct version
+FROM golang:1.22.5 AS build
 
 # Set the working directory inside the container
 WORKDIR /app/backend/user-service

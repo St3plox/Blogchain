@@ -23,16 +23,24 @@ gen-private:
 run-local:
 	go run app/backend/user-service/main.go
 
-build-image:
+build-image-service:
 	docker build -t $(BACKEND_IMAGE) -f zarf/docker/Dockerfile .
 
-run:
+run-service:
 	docker run -d -p $(EXPOSE_PORT):$(INTERNAL_PORT) --name $(BACKEND_NAME) $(BACKEND_IMAGE)
 
-logs:
+run-hardhat:
+	docker build -t hardhat-node -f zarf/docker/hardhat/Dockerfile .
+	docker run -d -p 8545:8545 --name hardhat-node hardhat-node
+
+stop-hardhat:
+	docker stop hardhat-node
+	docker rm hardhat-node
+
+logs-service:
 	docker logs $(BACKEND_NAME)
 
-stop:
+stop-service:
 	docker stop $(BACKEND_NAME)
 	docker rm $(BACKEND_NAME)
 
@@ -49,8 +57,10 @@ stop-mongo:
 	docker stop mongodb
 	docker rm mongodb
 
+
 solc-compile:
 	 solc --overwrite --abi --bin -o contracts/bin contracts/PostStorage.sol
 
 generate-contract:
 	abigen --abi=contracts/bin/PostStorage.abi --bin=contracts/bin/PostStorage.bin --pkg=contract --out=foundation/blockchain/contract/post_storage.go
+
