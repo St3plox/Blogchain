@@ -33,7 +33,7 @@ import (
 var build = "develop"
 
 func main() {
-	log := logger.New("BACKEND - SERVICE")
+	log := logger.New("USER - SERVICE")
 
 	if err := run(log); err != nil {
 		log.Error().Err(err).Msg("startup")
@@ -73,7 +73,8 @@ func run(log *zerolog.Logger) error {
 		}
 		ETH struct {
 			Rawurl   string `conf:"default:http://127.0.0.1:8545"`
-			AdminKey string `conf:"default:0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"`
+			GasLimit uint64 `conf:"default:6000000"`
+			AdminKey string `conf:"default:0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6"`
 		} // NOTE: AdminKey was taken from hardhat network. These accounts, and their private keys, are publicly known.
 		//Any funds sent to them on Mainnet or any other live network WILL BE LOST.
 	}{
@@ -146,6 +147,8 @@ func run(log *zerolog.Logger) error {
 	if err != nil {
 		return fmt.Errorf("error creating auth %e", err)
 	}
+
+	cAuth.GasLimit = cfg.ETH.GasLimit
 
 	postContractAddress, _, instance, err := contract.DeployContract(cAuth, ethclient.Client)
 	if err != nil {

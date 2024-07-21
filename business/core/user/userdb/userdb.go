@@ -7,7 +7,6 @@ import (
 	"github.com/St3plox/Blogchain/business/core/user"
 	"github.com/St3plox/Blogchain/business/data/order"
 
-	"github.com/google/uuid"
 	"github.com/rs/zerolog"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -65,7 +64,7 @@ func (s *Store) Create(ctx context.Context, usr user.User) (user.User, error) {
 	}
 
 	newUser := &usr
-	newUser.ID = res.InsertedID.(primitive.ObjectID).Hex()
+	newUser.ID = res.InsertedID.(primitive.ObjectID)
 
 	return *newUser, nil
 }
@@ -136,11 +135,18 @@ func (s *Store) Count(ctx context.Context, filter user.QueryFilter) (int, error)
 	return int(count), nil
 }
 
-func (s *Store) QueryByID(ctx context.Context, userID uuid.UUID) (user.User, error) {
-	filter := bson.M{"_id": userID}
+func (s *Store) QueryByID(ctx context.Context, userID string) (user.User, error) {
+
+	objID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		s.log.Error().Err(err).Msg("mongodb")
+		return user.User{}, err
+	}
+
+	filter := bson.M{"_id": objID}
 
 	var usr user.User
-	err := s.collection.FindOne(ctx, filter).Decode(&usr)
+	err = s.collection.FindOne(ctx, filter).Decode(&usr)
 	if err != nil {
 		s.log.Error().Err(err).Msg("mongodb")
 		return user.User{}, err
@@ -148,7 +154,7 @@ func (s *Store) QueryByID(ctx context.Context, userID uuid.UUID) (user.User, err
 	return usr, nil
 }
 
-func (s *Store) QueryByIDs(ctx context.Context, userIDs []uuid.UUID) ([]user.User, error) {
+func (s *Store) QueryByIDs(ctx context.Context, userIDs []string) ([]user.User, error) {
 	filter := bson.M{"_id": bson.M{"$in": userIDs}}
 
 	cur, err := s.collection.Find(ctx, filter)

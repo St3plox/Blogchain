@@ -41,7 +41,7 @@ func (h *Handler) RegisterUser(ctx context.Context, w http.ResponseWriter, r *ht
 	claims := auth.Claims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
-			Subject:   usr.ID,
+			Subject:   usr.ID.Hex(),
 		},
 		Roles: usr.Roles,
 	}
@@ -88,7 +88,7 @@ func (h *Handler) LoginUser(ctx context.Context, w http.ResponseWriter, r *http.
 	// Verify password
 	claims := auth.Claims{
 		RegisteredClaims: jwt.RegisteredClaims{
-			Subject:   usr.ID,
+			Subject:   usr.ID.Hex(),
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
 		},
 		Roles: usr.Roles,

@@ -13,7 +13,6 @@ import (
 	"github.com/St3plox/Blogchain/business/web/auth"
 	v1 "github.com/St3plox/Blogchain/business/web/v1"
 	"github.com/St3plox/Blogchain/foundation/web"
-	"github.com/google/uuid"
 )
 
 type Handler struct {
@@ -38,12 +37,11 @@ func (h *Handler) Post(ctx context.Context, w http.ResponseWriter, r *http.Reque
 	}
 	claims := auth.GetClaims(ctx)
 
-	id, err := uuid.Parse(claims.Subject)
 	if err != nil {
 		return v1.NewRequestError(errors.New("decode error "+err.Error()), http.StatusInternalServerError)
 	}
 
-	usr, err := h.user.QueryByID(ctx, id)
+	usr, err := h.user.QueryByID(ctx, claims.Subject)
 	if err != nil {
 		return v1.NewRequestError(errors.New("user error "+err.Error()), http.StatusNotFound)
 	}
@@ -68,12 +66,11 @@ func (h *Handler) GetUserPosts(ctx context.Context, w http.ResponseWriter, r *ht
 		return v1.NewRequestError(err, http.StatusBadRequest)
 	}
 
-	id, err := uuid.Parse(claims.Subject)
 	if err != nil {
 		return v1.NewRequestError(errors.New("decode error "+err.Error()), http.StatusInternalServerError)
 	}
 
-	usr, err := h.user.QueryByID(ctx, id)
+	usr, err := h.user.QueryByID(ctx, claims.Subject)
 	if err != nil {
 		return v1.NewRequestError(errors.New("user error "+err.Error()), http.StatusNotFound)
 	}
