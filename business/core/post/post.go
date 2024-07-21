@@ -44,7 +44,7 @@ func (c *Core) Create(ctx context.Context, np NewPost, userAddressHex string) (P
 	if err != nil {
 		return Post{}, err
 	}
-	tx, err := c.postContract.Contract.Post(auth, np.Title, np.Content, uint8(np.Category), address)
+	tx, err := c.postContract.Contract.Post(auth, np.Title, np.Content, uint8(np.Category), np.Tags, address)
 	if err != nil {
 		return Post{}, fmt.Errorf("error making post: %e", err)
 	}
@@ -69,6 +69,7 @@ func (c *Core) Create(ctx context.Context, np NewPost, userAddressHex string) (P
 				Category:  Category(event.Category),
 				Timestamp: big.NewInt(receipt.BlockNumber.Int64()),
 				Content:   np.Content,
+				Tags:      event.Tags,
 			}
 			break
 		} else {
@@ -106,6 +107,7 @@ func (c *Core) QueryByAddress(ctx context.Context, userAddressHex string, page u
 			Title:     post.Title,
 			Content:   post.Content,
 			Timestamp: post.Timestamp,
+			Tags:      post.Tags,
 			Category:  Category(post.Category),
 		})
 	}
@@ -127,6 +129,7 @@ func (c *Core) QueryByIndex(ctx context.Context, userAddressHex string, index ui
 		Title:     post.Title,
 		Content:   post.Content,
 		Timestamp: post.Timestamp,
+		Tags:      post.Tags,
 		Category:  Category(post.Category),
 	}, nil
 }
@@ -144,6 +147,7 @@ func (c *Core) GetPostByID(ctx context.Context, id *big.Int) (Post, error) {
 		Title:     post.Title,
 		Content:   post.Content,
 		Timestamp: post.Timestamp,
+		Tags:      post.Tags,
 		Category:  Category(post.Category),
 	}, nil
 }
@@ -180,6 +184,7 @@ func (c *Core) Query(ctx context.Context, page uint64, pageSize uint64) ([]Post,
 			Title:     post.Title,
 			Content:   post.Content,
 			Timestamp: post.Timestamp,
+			Tags:      post.Tags,
 			Category:  Category(post.Category),
 		})
 	}

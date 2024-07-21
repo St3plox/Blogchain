@@ -2,20 +2,22 @@ package user
 
 import (
 	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type User struct {
-	ID           string    `json:"id,omitempty" bson:"_id,omitempty"`
-	Name         string    `json:"name"`
-	Email        string    `json:"email"`
-	Roles        []Role    `json:"roles"`
-	PasswordHash []byte    `json:"password_hash"`
-	AddressHex   string    `json:"address_hex"`
-	PublicKey    []byte    `json:"public_key"`
-	PrivateKey   []byte    `json:"private_key"`
-	SecretKey    []byte    `json:"secret_key"`
-	DateCreated  time.Time `json:"date_created"`
-	DateUpdated  time.Time `json:"date_updated"`
+	ID           primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
+	Name         string             `json:"name"`
+	Email        string             `json:"email"`
+	Roles        []Role             `json:"roles"`
+	PasswordHash []byte             `json:"password_hash"`
+	AddressHex   string             `json:"address_hex"`
+	PublicKey    []byte             `json:"public_key"`
+	PrivateKey   []byte             `json:"private_key"`
+	SecretKey    []byte             `json:"secret_key"`
+	DateCreated  time.Time          `json:"date_created"`
+	DateUpdated  time.Time          `json:"date_updated"`
 }
 
 type NewUser struct {
@@ -43,7 +45,7 @@ type UserCredentials struct {
 
 func Map(user User) UserDTO {
 	return UserDTO{
-		ID:          user.ID,
+		ID:          user.ID.String(),
 		Name:        user.Name,
 		Email:       user.Email,
 		Roles:       user.Roles,

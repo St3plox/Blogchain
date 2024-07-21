@@ -13,6 +13,7 @@ contract PostStorage {
         address author;
         string title;
         string content;
+        string[] tags;
         uint256 timestamp;
         Category category;
     }
@@ -26,6 +27,7 @@ contract PostStorage {
         uint256 id,
         address indexed author,
         string title,
+        string[] tags,
         Category category
     );
 
@@ -33,6 +35,7 @@ contract PostStorage {
         string memory _title,
         string memory _content,
         Category _category,
+        string[] memory _tags,
         address author
     ) public {
         if (userPosts[author].length == 0) {
@@ -48,13 +51,14 @@ contract PostStorage {
             content: _content,
             title: _title,
             timestamp: block.timestamp,
+            tags: _tags,
             category: _category
         });
 
         userPosts[author].push(newPost);
         idToPost[newId] = newPost;
 
-        emit PostPublished(newId, author, _title, _category);
+        emit PostPublished(newId, author, _title, _tags, _category);
     }
 
     function getPostByID(uint256 id) public view returns (Post memory) {
@@ -66,7 +70,11 @@ contract PostStorage {
         return userPosts[user];
     }
 
-     function getUsersPostPaginated(address user, uint256 page, uint256 pageSize) public view returns (Post[] memory) {
+    function getUsersPostPaginated(
+        address user,
+        uint256 page,
+        uint256 pageSize
+    ) public view returns (Post[] memory) {
         uint256 totalPosts = userPosts[user].length;
         uint256 start = page * pageSize;
         uint256 end = start + pageSize;
@@ -84,7 +92,6 @@ contract PostStorage {
 
         return paginatedPosts;
     }
-
 
     function getPostByIndex(
         address user,
@@ -112,7 +119,10 @@ contract PostStorage {
         return allPosts;
     }
 
-    function getPostsPaginated(uint256 page, uint256 pageSize) public view returns (Post[] memory) {
+    function getPostsPaginated(
+        uint256 page,
+        uint256 pageSize
+    ) public view returns (Post[] memory) {
         uint totalPostsCount = 0;
         for (uint i = 0; i < users.length; i++) {
             totalPostsCount += userPosts[users[i]].length;
@@ -121,7 +131,9 @@ contract PostStorage {
         require(page * pageSize < totalPostsCount, "Page out of range");
 
         uint start = page * pageSize;
-        uint end = start + pageSize > totalPostsCount ? totalPostsCount : start + pageSize;
+        uint end = start + pageSize > totalPostsCount
+            ? totalPostsCount
+            : start + pageSize;
 
         Post[] memory paginatedPosts = new Post[](end - start);
         uint currentIndex = 0;

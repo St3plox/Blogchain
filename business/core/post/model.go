@@ -22,12 +22,14 @@ type Post struct {
 	Content   string
 	Timestamp *big.Int
 	Category  Category
+	Tags      []string
 }
 
 type NewPost struct {
 	Title    string
 	Content  string
 	Category Category
+	Tags     []string
 }
 
 func (p Post) IsEmpty() bool {
