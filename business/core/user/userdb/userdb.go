@@ -25,17 +25,41 @@ type Store struct {
 }
 
 func NewStore(log *zerolog.Logger, client *mongo.Client) *Store {
-	return &Store{
+	store := &Store{
 		log:        log,
 		client:     client,
 		collection: client.Database(dbName).Collection(collectionName),
 	}
+
+	// Create unique indexes for email and name
+	indexes := []mongo.IndexModel{
+		{
+			Keys:    bson.D{{Key: "email", Value: 1}},
+			Options: options.Index().SetUnique(true),
+		},
+		{
+			Keys:    bson.D{{Key: "name", Value: 1}},
+			Options: options.Index().SetUnique(true),
+		},
+	}
+
+	_, err := store.collection.Indexes().CreateMany(context.Background(), indexes)
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to create indexes")
+	}
+
+	return store
 }
 
+// NOTE: add email verification in the future
 // NOTE: add email verification in the future
 func (s *Store) Create(ctx context.Context, usr user.User) (user.User, error) {
 	res, err := s.collection.InsertOne(ctx, usr)
 	if err != nil {
+		if mongo.IsDuplicateKeyError(err) {
+			s.log.Error().Err(err).Msg("mongodb: duplicate key error")
+			return user.User{}, err // Handle duplicate key error appropriately
+		}
 		s.log.Error().Err(err).Msg("mongodb: inserting user")
 		return user.User{}, err
 	}
