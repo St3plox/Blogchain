@@ -25,7 +25,6 @@ func New(user *user.Core, auth *auth.Auth) *Handler {
 }
 
 func (h *Handler) RegisterUser(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-
 	var nu user.NewUser
 	err := json.NewDecoder(r.Body).Decode(&nu)
 	if err != nil {
