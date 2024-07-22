@@ -22,23 +22,23 @@ type APIMuxConfig struct {
 }
 
 func APIMux(cfg APIMuxConfig) *web.App {
-	app := web.NewApp(cfg.Shutdown, mid.Cors(), mid.Logger(cfg.Log), mid.Errors(cfg.Log), mid.Panics())
+	app := web.NewApp(cfg.Shutdown, mid.Logger(cfg.Log), mid.Errors(cfg.Log), mid.Panics())
 
 	uh := usergrp.New(cfg.UserCore, cfg.Auth)
 
-	app.Handle("POST /users/register", uh.RegisterUser)
-	app.Handle("POST /users/login", uh.LoginUser)
+	app.Handle("/users/register", "POST", uh.RegisterUser)
+	app.Handle("/users/login", "POST", uh.LoginUser)
 
 	ph := postgrp.New(cfg.PostCore, cfg.Auth, cfg.UserCore)
 
-	app.Handle("POST /posts", ph.Post, mid.Authenticate(cfg.Auth), mid.Authorize(cfg.Auth, auth.RuleAny))
+	app.Handle("/posts", "POST", ph.Post, mid.Authenticate(cfg.Auth), mid.Authorize(cfg.Auth, auth.RuleAny))
 
-	app.Handle("GET /posts", ph.GetUserPosts, mid.Authenticate(cfg.Auth), mid.Authorize(cfg.Auth, auth.RuleAny))
-	app.Handle("GET /posts/all", ph.GetAll, mid.Authenticate(cfg.Auth), mid.Authorize(cfg.Auth, auth.RuleAny))
-	app.Handle("GET /posts/{address}", ph.GetPostsByUserAddress, mid.Authenticate(cfg.Auth), mid.Authorize(cfg.Auth, auth.RuleAny))
+	app.Handle("/posts", "GET", ph.GetUserPosts, mid.Authenticate(cfg.Auth), mid.Authorize(cfg.Auth, auth.RuleAny))
+	app.Handle("/posts/all", "GET", ph.GetAll, mid.Authenticate(cfg.Auth), mid.Authorize(cfg.Auth, auth.RuleAny))
+	app.Handle("/posts/{address}", "GET", ph.GetPostsByUserAddress, mid.Authenticate(cfg.Auth), mid.Authorize(cfg.Auth, auth.RuleAny))
 
-	app.Handle("GET /posts/id/{id}", ph.GetById, mid.Authenticate(cfg.Auth), mid.Authorize(cfg.Auth, auth.RuleAny))
-	app.Handle("GET /posts/{address}/{index}", ph.GetPostsByUserAddressAndIndex, mid.Authenticate(cfg.Auth), mid.Authorize(cfg.Auth, auth.RuleAny))
+	app.Handle("/posts/id/{id}", "GET", ph.GetById, mid.Authenticate(cfg.Auth), mid.Authorize(cfg.Auth, auth.RuleAny))
+	app.Handle("/posts/{address}/{index}", "GET", ph.GetPostsByUserAddressAndIndex, mid.Authenticate(cfg.Auth), mid.Authorize(cfg.Auth, auth.RuleAny))
 
 	return app
 }
