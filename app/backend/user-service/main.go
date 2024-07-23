@@ -225,6 +225,7 @@ func run(log *zerolog.Logger) error {
 		gorillaHandlers.AllowedOrigins([]string{"*"}), // Allow all origins, customize as needed
 		gorillaHandlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
 		gorillaHandlers.AllowedHeaders([]string{"Content-Type", "Authorization"}),
+		gorillaHandlers.ExposedHeaders([]string{"Authorization"}),
 	)
 
 	corsWrappedMux := corsMiddleware(apiMux)

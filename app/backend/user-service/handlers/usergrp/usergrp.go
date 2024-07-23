@@ -99,7 +99,7 @@ func (h *Handler) LoginUser(ctx context.Context, w http.ResponseWriter, r *http.
 	}
 
 	// Set JWT token in response header
-	w.Header().Set("Authorization", "Bearer "+token)
+	w.Header().Set("Authorization", token)
 
 	err = web.Respond(ctx, w, user.Map(usr), http.StatusOK)
 	if err != nil {

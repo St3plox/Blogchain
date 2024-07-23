@@ -24,13 +24,20 @@ export default {
     async login() {
       try {
         const response = await axios.post('/users/login', {
-          email: this.email, // Use email field correctly
+          email: this.email,
           password: this.password
         });
-        localStorage.setItem('token', response.data.token); // Store token
-        alert('Login successful!');
+        
+        // Extract the Authorization header
+        const token = response.headers['authorization'];
+        
+        if (token) {
+          localStorage.setItem('token', token); // Store the token
+          alert('Login successful!');
+        } else {
+          alert('Login failed.');
+        }
       } catch (error) {
-        console.error('Login failed:', error);
         alert('Login failed.');
       }
     }
