@@ -15,8 +15,7 @@ export default {
     data() {
         return {
             posts: [],
-            page: 0, // Define page and pageSize as data properties if they might change
-            pageSize: 1
+            page: 0,             pageSize: 50
         };
     },
     async created() {

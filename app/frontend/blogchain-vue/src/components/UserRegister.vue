@@ -1,17 +1,18 @@
 <template>
-  <div class="form-container" >
+  <div class="form-container">
     <h2>Register</h2>
     <form @submit.prevent="register">
       <input v-model="username" placeholder="Username" required />
-      <input v-model="email" placeholder="Email " required />
+      <input v-model="email" type="email" placeholder="Email" required />
       <input v-model="password" type="password" placeholder="Password" required />
-      <button type="submit">Register</button>
+      <button type="submit" class="register-button">Register</button>
     </form>
   </div>
 </template>
 
 <script>
 import axios from '@/axios';
+import '@/assets/css/form-styles.css'; // Import the shared styles
 
 export default {
   name: 'UserRegister',
@@ -19,7 +20,7 @@ export default {
     return {
       username: '',
       password: '',
-      email:    ''
+      email: ''
     };
   },
   methods: {
@@ -28,7 +29,7 @@ export default {
         await axios.post('/users/register', {
           username: this.username,
           password: this.password,
-          email:    this.email
+          email: this.email
         });
         alert('Registration successful!');
       } catch (error) {
@@ -39,42 +40,3 @@ export default {
   }
 };
 </script>
-
-
-<style scoped>
-.form-container {
-  max-width: 400px;
-  margin: 0 auto;
-  padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-form {
-  display: flex;
-  flex-direction: column;
-}
-
-input {
-  margin-bottom: 15px;
-  padding: 10px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-}
-
-button {
-  padding: 10px;
-  font-size: 16px;
-  background-color: #42b983;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-button:hover {
-  background-color: #369d73;
-}
-</style>
