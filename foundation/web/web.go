@@ -3,7 +3,6 @@ package web
 import (
 	"context"
 	"errors"
-	"log"
 	"net/http"
 	"os"
 	"syscall"
@@ -59,19 +58,17 @@ func (a *App) Handle(path string, method string, handler Handler, mw ...Middlewa
 
 	// Wrap 'h' in http.HandlerFunc to match the ServeMux.Handler method signature
 	a.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
-		log.Default().Println("Entered HandleFunc")
+
 		err := h(r.Context(), w, r)
 		if err != nil {
-			log.Default().Println("Entered != nil section HandleFunc")
-			// Check if it's a not found error
+
 			var reqErr *v1.RequestError
 			if errors.As(err, &reqErr) {
-				log.Default().Println("Entered as HandleFunc")
+
 				http.Error(w, reqErr.Err.Error(), reqErr.Status)
 				return
 			}
-			// Handle other errors
-			log.Default().Println("Entered unknown error section HandleFunc")
+
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		}
 	}).Methods(method)

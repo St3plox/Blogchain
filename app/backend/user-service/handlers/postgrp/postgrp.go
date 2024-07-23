@@ -62,10 +62,6 @@ func (h *Handler) GetUserPosts(ctx context.Context, w http.ResponseWriter, r *ht
 		return v1.NewRequestError(err, http.StatusBadRequest)
 	}
 
-	if err != nil {
-		return v1.NewRequestError(errors.New("decode error "+err.Error()), http.StatusInternalServerError)
-	}
-
 	usr, err := h.user.QueryByID(ctx, claims.Subject)
 	if err != nil {
 		return v1.NewRequestError(errors.New("user error "+err.Error()), http.StatusNotFound)
