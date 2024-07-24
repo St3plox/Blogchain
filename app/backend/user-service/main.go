@@ -28,6 +28,8 @@ import (
 	"github.com/rs/zerolog"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+
+	gorillaHandlers "github.com/gorilla/handlers"
 )
 
 var build = "develop"
@@ -219,15 +221,25 @@ func run(log *zerolog.Logger) error {
 		PostCore: postCore,
 	})
 
+	corsMiddleware := gorillaHandlers.CORS(
+		gorillaHandlers.AllowedOrigins([]string{"*"}), // Allow all origins, customize as needed
+		gorillaHandlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
+		gorillaHandlers.AllowedHeaders([]string{"Content-Type", "Authorization"}),
+		gorillaHandlers.ExposedHeaders([]string{"Authorization"}),
+	)
+
+	corsWrappedMux := corsMiddleware(apiMux)
+
 	errorLogger := zerolog.New(os.Stderr).With().Timestamp().Logger()
 	api := http.Server{
 		Addr:         cfg.Web.APIHost,
-		Handler:      apiMux,
+		Handler:      corsWrappedMux,
 		ReadTimeout:  cfg.Web.ReadTimeout,
 		WriteTimeout: cfg.Web.WriteTimeout,
 		IdleTimeout:  cfg.Web.IdleTimeout,
 		ErrorLog:     defaultLog.New(&errorLogger, "", 0),
 	}
+	
 
 	serverErrors := make(chan error, 1)
 	go func() {

@@ -3,7 +3,6 @@ package web
 import (
 	"context"
 	"errors"
-	"log"
 	"net/http"
 	"os"
 	"syscall"
@@ -11,19 +10,20 @@ import (
 
 	v1 "github.com/St3plox/Blogchain/business/web/v1"
 	"github.com/google/uuid"
+	"github.com/gorilla/mux"
 )
 
 type Handler func(ctx context.Context, w http.ResponseWriter, r *http.Request) error
 
 type App struct {
-	*http.ServeMux
+	*mux.Router
 	shutdown chan os.Signal
 	mw       []Middleware
 }
 
 func NewApp(shutdown chan os.Signal, mw ...Middleware) *App {
 	return &App{
-		ServeMux: http.NewServeMux(),
+		Router:   mux.NewRouter(),
 		shutdown: shutdown,
 		mw:       mw,
 	}
@@ -35,8 +35,7 @@ func (a *App) SignalShutdown() {
 
 // Handle sets a handler function for a given HTTP method and path pair
 // to the application server mux.
-
-func (a *App) Handle(path string, handler Handler, mw ...Middleware) {
+func (a *App) Handle(path string, method string, handler Handler, mw ...Middleware) {
 	handler = wrapMiddleware(mw, handler)
 	handler = wrapMiddleware(a.mw, handler)
 
@@ -44,37 +43,35 @@ func (a *App) Handle(path string, handler Handler, mw ...Middleware) {
 		var v = Values{
 			TraceID: uuid.NewString(),
 			Now:     time.Now().UTC(),
-			}
-			ctx = context.WithValue(ctx, key, &v)
+		}
+		ctx = context.WithValue(ctx, key, &v)
 
-			if err := handler(ctx, w, r); err != nil {
-				if validateShutdown(err) {
-					a.SignalShutdown()
-					return nil // Return nil here to indicate graceful shutdown without error
-				}
-				return err
+		if err := handler(ctx, w, r); err != nil {
+			if validateShutdown(err) {
+				a.SignalShutdown()
+				return nil // Return nil here to indicate graceful shutdown without error
 			}
-			return nil // Return nil here to indicate successful handling without error
+			return err
+		}
+		return nil // Return nil here to indicate successful handling without error
 	}
 
 	// Wrap 'h' in http.HandlerFunc to match the ServeMux.Handler method signature
 	a.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
-		log.Default().Println("Entered HandleFunc")
+
 		err := h(r.Context(), w, r)
 		if err != nil {
-			log.Default().Println("Entered != nil section HandleFunc")
-			// Check if it's a not found error
+
 			var reqErr *v1.RequestError
 			if errors.As(err, &reqErr) {
-				log.Default().Println("Entered as HandleFunc")
+
 				http.Error(w, reqErr.Err.Error(), reqErr.Status)
 				return
 			}
-			// Handle other errors
-			log.Default().Println("Entered unknown error section HandleFunc")
+
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		}
-	})
+	}).Methods(method)
 }
 func validateShutdown(err error) bool {
 

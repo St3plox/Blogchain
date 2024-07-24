@@ -15,21 +15,22 @@ const (
 	Article
 )
 
+
 type Post struct {
-	ID        *big.Int
-	Author    common.Address
-	Title     string
-	Content   string
-	Timestamp *big.Int
-	Category  Category
-	Tags      []string
+	ID        *big.Int        `json:"id"`
+	Author    common.Address  `json:"author"`
+	Title     string          `json:"title"`
+	Content   string          `json:"content"`
+	Timestamp *big.Int        `json:"timestamp"`
+	Category  Category        `json:"category"`
+	Tags      []string        `json:"tags"`
 }
 
 type NewPost struct {
-	Title    string
-	Content  string
-	Category Category
-	Tags     []string
+	Title    string   `json:"title"`
+	Content  string   `json:"content"`
+	Category Category `json:"category"`
+	Tags     []string `json:"tags"`
 }
 
 func (p Post) IsEmpty() bool {

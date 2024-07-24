@@ -2,7 +2,6 @@ package mid
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 
 	"github.com/St3plox/Blogchain/business/web/auth"
@@ -35,9 +34,6 @@ func Authorize(a *auth.Auth, rule string) web.Middleware {
 	m := func(handler web.Handler) web.Handler {
 		h := func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 			claims := auth.GetClaims(ctx)
-
-			fmt.Println(claims.Subject)
-			fmt.Println(claims.Roles)
 
 			if claims.Subject == "" {
 				return auth.NewAuthError("authorize: you are not authorized for that action, no claims")

@@ -25,7 +25,6 @@ func New(user *user.Core, auth *auth.Auth) *Handler {
 }
 
 func (h *Handler) RegisterUser(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-
 	var nu user.NewUser
 	err := json.NewDecoder(r.Body).Decode(&nu)
 	if err != nil {
@@ -100,7 +99,7 @@ func (h *Handler) LoginUser(ctx context.Context, w http.ResponseWriter, r *http.
 	}
 
 	// Set JWT token in response header
-	w.Header().Set("Authorization", "Bearer "+token)
+	w.Header().Set("Authorization", token)
 
 	err = web.Respond(ctx, w, user.Map(usr), http.StatusOK)
 	if err != nil {

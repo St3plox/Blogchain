@@ -58,6 +58,15 @@ stop-mongo:
 	docker rm mongodb
 
 
+
+run-front:
+	cd app/frontend/blogchain-vue
+	npm run dev
+
+front-deps:
+	cd app/frontend/blogchain-vue
+	npm install
+
 solc-compile:
 	 solc --overwrite --abi --bin -o contracts/bin contracts/PostStorage.sol
 
