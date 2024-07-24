@@ -6,7 +6,6 @@
 
 <script>
 import PostForm from './post/PostForm.vue';
-import PostForm from './post/PostForm.vue';
 
 export default {
     name: 'HomePage',

@@ -32,10 +32,16 @@ export default {
 
         // Extract the Authorization header
         const token = response.headers['authorization'];
-
+        
         if (token) {
-          localStorage.setItem('token', token); // Store the token
+          localStorage.setItem('token', token);
+          localStorage.setItem('username', response.data.name); // Corrected from setUsername
           alert('Login successful!');
+          
+          // Redirect to the desired route, e.g., homepage or dashboard
+          this.$router.push('/').then(() => {
+            window.location.reload(); // Reload the page after redirect
+          });
         } else {
           alert('Login failed.');
         }
@@ -45,5 +51,4 @@ export default {
     }
   }
 };
-
 </script>
