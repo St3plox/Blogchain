@@ -27,5 +27,4 @@ export default {
 </script>
 
 <style scoped>
-/* Add any additional styles specific to BlogPosts if needed */
 </style>
