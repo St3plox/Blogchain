@@ -4,6 +4,13 @@ export const Category = {
   ARTICLE: 2,
 };
 
+//post_model.js
+export const categoryNames = {
+  [Category.BLOG]: 'Blog',
+  [Category.NEWS]: 'News',
+  [Category.ARTICLE]: 'Article'
+};
+
 export class Post {
   /**
    * Create a Post.
@@ -14,7 +21,7 @@ export class Post {
    * @param {BigInt} timestamp - The timestamp of when the post was created.
    * @param {number} category - The category of the post.
    * @param {string[]} tags - The tags associated with the post.
-   */
+  */
   constructor(id, author, title, content, timestamp, category, tags) {
     this.id = id;
     this.author = author;
@@ -34,7 +41,7 @@ export class NewPost {
    * @param {string} content - The content of the new post.
    * @param {number} category - The category of the new post.
    * @param {string[]} tags - The tags associated with the new post.
-   */
+  */
 
   constructor(title, content, category, tags) {
     this.title = title;
@@ -55,3 +62,4 @@ export const mapPosts = (postsData) => {
     postData.tags
   ));
 };
+

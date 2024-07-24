@@ -34,7 +34,7 @@ func APIMux(cfg APIMuxConfig) *web.App {
 	app.Handle("/posts", "POST", ph.Post, mid.Authenticate(cfg.Auth), mid.Authorize(cfg.Auth, auth.RuleAny))
 
 	app.Handle("/posts", "GET", ph.GetUserPosts, mid.Authenticate(cfg.Auth), mid.Authorize(cfg.Auth, auth.RuleAny))
-	app.Handle("/posts/all", "GET", ph.GetAll, mid.Authenticate(cfg.Auth), mid.Authorize(cfg.Auth, auth.RuleAny))
+	app.Handle("/posts/all", "GET", ph.GetAll)
 	app.Handle("/posts/{address}", "GET", ph.GetPostsByUserAddress, mid.Authenticate(cfg.Auth), mid.Authorize(cfg.Auth, auth.RuleAny))
 
 	app.Handle("/posts/id/{id}", "GET", ph.GetById, mid.Authenticate(cfg.Auth), mid.Authorize(cfg.Auth, auth.RuleAny))

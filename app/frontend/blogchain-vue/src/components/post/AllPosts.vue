@@ -8,24 +8,24 @@
 </template>
 
 <script>
-import { getUserPosts } from '@/scripts/posts_handler';
+import { getAllPosts } from '@/scripts/posts_handler';
 import BasePostsComponent from './BasePostsComponent.vue';
 import PostComponent from './PostComponent.vue';
 
 export default {
-    name: 'BlogPosts',
+    name: 'AllPosts',
     extends: BasePostsComponent,
     components: {
         PostComponent
     },
     methods: {
         async fetchPosts(page, pageSize) {
-            return getUserPosts(page, pageSize);
+            return getAllPosts(page, pageSize);
         }
     }
 };
 </script>
 
 <style scoped>
-/* Add any additional styles specific to BlogPosts if needed */
+/* Add any additional styles specific to AllPosts if needed */
 </style>

@@ -1,6 +1,6 @@
 import axios from '@/axios';
 import { getToken } from '@/utils/auth';
-import { USER_POSTS_URL } from '@/utils/request_paths';
+import { ALL_POSTS_URL, USER_POSTS_URL } from '@/utils/request_paths';
 import { mapPosts } from '@/scripts/post_model'
 
 
@@ -17,9 +17,7 @@ export const getUserPosts = async (pageNumber, pageSize) => {
             }
         });
 
-        console.log(response.data)
         const posts = mapPosts(response.data)
-        console.log(posts)
 
         return posts;
 
@@ -30,26 +28,20 @@ export const getUserPosts = async (pageNumber, pageSize) => {
 };
 
 export const getAllPosts = async (pageNumber, pageSize) => {
-    const token = getToken();
     try {
-        const response = await axios.get(USER_POSTS_URL, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            },
+        const response = await axios.get(ALL_POSTS_URL, {
             params: {
                 page: pageNumber,
                 pageSize: pageSize
             }
         });
 
-        console.log(response.data)
         const posts = mapPosts(response.data)
-        console.log(posts)
 
         return posts;
 
     } catch (error) {
-        console.error('Error fetching user posts:', error);
+        console.error('Error fetching posts:', error);
         return [];
     }
 
