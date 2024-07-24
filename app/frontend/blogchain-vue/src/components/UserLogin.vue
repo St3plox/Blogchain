@@ -21,6 +21,7 @@ export default {
       password: ''
     };
   },
+
   methods: {
     async login() {
       try {
@@ -44,4 +45,5 @@ export default {
     }
   }
 };
+
 </script>

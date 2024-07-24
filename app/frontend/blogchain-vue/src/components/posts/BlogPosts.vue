@@ -15,7 +15,7 @@ export default {
     data() {
         return {
             posts: [],
-            page: 0,             pageSize: 50
+            page: 0, pageSize: 50
         };
     },
     async created() {

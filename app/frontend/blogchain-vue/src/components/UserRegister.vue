@@ -12,7 +12,7 @@
 
 <script>
 import axios from '@/axios';
-import '@/assets/css/form-styles.css'; // Import the shared styles
+import '@/assets/css/form-styles.css';
 
 export default {
   name: 'UserRegister',
@@ -29,7 +29,7 @@ export default {
         await axios.post('/users/register', {
           username: this.username,
           password: this.password,
-          email: this.email
+          email:    this.email
         });
         alert('Registration successful!');
       } catch (error) {
