@@ -13,6 +13,7 @@ import (
 	"github.com/St3plox/Blogchain/business/web/auth"
 	v1 "github.com/St3plox/Blogchain/business/web/v1"
 	"github.com/St3plox/Blogchain/foundation/web"
+	"github.com/gorilla/mux"
 )
 
 type Handler struct {
@@ -84,14 +85,14 @@ func (h *Handler) GetUserPosts(ctx context.Context, w http.ResponseWriter, r *ht
 }
 
 func (h *Handler) GetPostsByUserAddress(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-	address := r.URL.Query().Get("address")
+	params := mux.Vars(r)
 
 	page, pageSize, err := extractPaginationParams(r)
 	if err != nil {
 		return v1.NewRequestError(err, http.StatusBadRequest)
 	}
 
-	posts, err := h.post.QueryByAddress(ctx, address, page, pageSize)
+	posts, err := h.post.QueryByAddress(ctx, params["address"], page, pageSize)
 	if err != nil {
 		return v1.NewRequestError(errors.New("post error "+err.Error()), http.StatusInternalServerError)
 	}
@@ -108,13 +109,14 @@ func (h *Handler) GetPostsByUserAddress(ctx context.Context, w http.ResponseWrit
 }
 
 func (h *Handler) GetPostsByUserAddressAndIndex(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-	address := r.PathValue("address")
-	index, err := strconv.ParseUint(r.PathValue("index"), 10, 64)
+	params := mux.Vars(r)
+
+	index, err := strconv.ParseUint(params["index"], 10, 64)
 	if err != nil {
 		return v1.NewRequestError(errors.New("parse error "+err.Error()), http.StatusInternalServerError)
 	}
 
-	post, err := h.post.QueryByIndex(ctx, address, index)
+	post, err := h.post.QueryByIndex(ctx, params["address"], index)
 	if err != nil {
 		return v1.NewRequestError(errors.New("get error "+err.Error()), http.StatusNotFound)
 	}
@@ -131,8 +133,9 @@ func (h *Handler) GetPostsByUserAddressAndIndex(ctx context.Context, w http.Resp
 }
 
 func (h *Handler) GetById(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-	idStr := r.PathValue("id")
-	id, success := new(big.Int).SetString(idStr, 10)
+	params := mux.Vars(r)
+
+	id, success := new(big.Int).SetString(params["id"], 10)
 	if !success {
 		return v1.NewRequestError(errors.New("id parse error"), http.StatusInternalServerError)
 	}
