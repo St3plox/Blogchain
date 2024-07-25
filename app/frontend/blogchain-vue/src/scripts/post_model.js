@@ -63,3 +63,15 @@ export const mapPosts = (postsData) => {
   ));
 };
 
+export const mapPost = (postData) => {
+  return new Post(
+    postData.id,
+    postData.author,
+    postData.title,
+    postData.content,
+    postData.timestamp,
+    postData.category,
+    postData.tags
+  )
+}
+
