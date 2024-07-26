@@ -7,7 +7,7 @@
   <h3 align="center">Blogchain </h3>
 
   <p align="center">
-    A simple blockchain-based blogging platform. 
+    A simple blockchain-based blogging platform
     <br />
 <!--     <a href="https://github.com/St3plox/Blogchain"><strong>Explore the docs »</strong></a> -->
     <br />
@@ -110,6 +110,7 @@ Frontend can be accessed on port 8080, backend - 5000
 ## Roadmap
 
 - [ ] Caching
+- [ ] Documentation
 - [ ] Media support
 - [ ] Adequate testing
 - [ ] CI/CD (or smth like this)
