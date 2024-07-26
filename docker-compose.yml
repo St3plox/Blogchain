@@ -23,10 +23,22 @@ services:
       dockerfile: zarf/docker/Dockerfile
     container_name: backend
     ports:
-      - 3000:3000
+      - "3000:3000"
     environment:
       - DB_URI=mongodb://mongodb:27017
+      - HARDHAT_NODE_URL=http://hardhat-node:8545
     depends_on:
       - mongodb
+      - hardhat-node
     restart: unless-stopped
 
+  frontend:
+    build:
+      context: ./app/frontend/blogchain-vue
+      dockerfile: Dockerfile
+    container_name: blogchain-vue
+    ports:
+      - "8080:80"  
+    environment:
+      - VUE_APP_BACKEND_URL=http://backend:3000
+    restart: unless-stopped

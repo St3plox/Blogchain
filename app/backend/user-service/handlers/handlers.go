@@ -39,6 +39,6 @@ func APIMux(cfg APIMuxConfig) *web.App {
 	app.Handle("/posts/{address}", "GET", ph.GetPostsByUserAddress)
 	app.Handle("/posts/id/{id}", "GET", ph.GetById)
 	app.Handle("/posts/{address}/{index}", "GET", ph.GetPostsByUserAddressAndIndex)
-
+	
 	return app
 }

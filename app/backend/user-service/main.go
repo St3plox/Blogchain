@@ -112,12 +112,17 @@ func run(log *zerolog.Logger) error {
 	// -------------------------------------------------------------------------
 	// Database Support
 
-	log.Info().Str("status", "startup").Str("uri", cfg.DB.Uri).Msg("initializing database support")
+	dbURI := os.Getenv("DB_URI")
+	if dbURI == "" {
+		dbURI = cfg.DB.Uri
+	}
+
+	log.Info().Str("status", "startup").Str("uri", dbURI).Msg("initializing database support")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(cfg.DB.Uri))
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(dbURI))
 	defer func() {
 		if err = client.Disconnect(ctx); err != nil {
 			panic(err)
@@ -130,7 +135,14 @@ func run(log *zerolog.Logger) error {
 	// -------------------------------------------------------------------------
 	//ETH client supoport
 
-	ethclient, err := blockchain.NewClient(cfg.ETH.Rawurl)
+	ethRawUrl := os.Getenv("HARDHAT_NODE_URL")
+	if ethRawUrl == "" {
+		ethRawUrl = cfg.ETH.Rawurl
+	}
+
+	log.Info().Str("status", "startup").Str("url", ethRawUrl).Msg("initializing eth client support")
+
+	ethclient, err := blockchain.NewClient(ethRawUrl)
 	if err != nil {
 		return fmt.Errorf("error creating eth client %e", err)
 	}
@@ -239,7 +251,6 @@ func run(log *zerolog.Logger) error {
 		IdleTimeout:  cfg.Web.IdleTimeout,
 		ErrorLog:     defaultLog.New(&errorLogger, "", 0),
 	}
-	
 
 	serverErrors := make(chan error, 1)
 	go func() {
