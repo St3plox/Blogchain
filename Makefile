@@ -15,10 +15,8 @@ dev-docker:
 	docker pull $(GOLANG)
 
 gen-private:
-	cd zarf
-	mkdir keys
-	cd keys
-	openssl genpkey -algorithm RSA -out private_key.pem -pkeyopt rsa_keygen_bits:4096
+	mkdir zarf/keys
+	openssl genpkey -algorithm RSA -out zarf/keys/private_key.pem -pkeyopt rsa_keygen_bits:4096
 
 run-local:
 	go run app/backend/user-service/main.go
