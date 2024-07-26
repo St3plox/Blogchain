@@ -62,7 +62,7 @@ func (c *Core) Create(ctx context.Context, nu NewUser) (User, error) {
 		return User{}, fmt.Errorf("create : %w", err)
 	}
 
-	passwordHash, err := bcrypt.GenerateFromPassword(nu.Password, 16)
+	passwordHash, err := bcrypt.GenerateFromPassword(nu.Password, 4)
 	if err != nil {
 		return User{}, fmt.Errorf("create : %w", err)
 	}
