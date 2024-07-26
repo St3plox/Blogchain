@@ -10,6 +10,7 @@ import (
 	"github.com/St3plox/Blogchain/business/data/order"
 	"github.com/St3plox/Blogchain/foundation/blockchain"
 	"github.com/St3plox/Blogchain/foundation/keystore"
+	"github.com/redis/go-redis/v9"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -35,14 +36,16 @@ type Storer interface {
 type Core struct {
 	storer    Storer
 	ethClient *blockchain.Client
+	redisClient *redis.Client
 }
 
 // NewCore constructs a core for user api access.
-func NewCore(storer Storer, ethClient *blockchain.Client) (*Core, error) {
+func NewCore(storer Storer, ethClient *blockchain.Client, redisClient *redis.Client) (*Core, error) {
 
 	return &Core{
 		storer:    storer,
 		ethClient: ethClient,
+		redisClient: redisClient,
 	}, nil
 }
 

@@ -6,6 +6,9 @@ BACKEND_NAME 	:= blockchain-back-api
 BASE_IMAGE_NAME := localhost/tveu/blogchain
 VERSION 		:= 0.0.1
 BACKEND_IMAGE 	:= $(BASE_IMAGE_NAME)/$(BACKEND_NAME):$(VERSION)
+REDIS_NAME		:= redis
+REDIS_PORT		:= 6379
+
 
 npm-tools:
 	npm install --save-dev @nomiclabs/hardhat-ethers ethers waffle chai
@@ -55,7 +58,12 @@ stop-mongo:
 	docker stop mongodb
 	docker rm mongodb
 
+launch-redis:
+	docker run -d --name $(REDIS_NAME) -p $(REDIS_PORT):$(REDIS_PORT)  redis/redis-stack-server:latest
 
+stop-redis:
+	docker stop $(REDIS_NAME)
+	docker rm &(REDIS_NAME)
 
 run-front:
 	cd app/frontend/blogchain-vue
