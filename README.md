@@ -50,7 +50,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-This project was build mostly for learning purposes. The app itself represents a frontend and backend api that uses document database and ethereum testnet. 
+This project was created mostly for learning purposes. The app itself represents a frontend and backend api that uses document database and ethereum testnet. 
 When user creates an account the ethereum address will be generated and asociated with their account. All user data are stored in the db. However, posts
 are stored in ethereum blockchain. There is also an admin account that signs all the transactions and pays the gas fees. Backend api uses jwt to 
 authenticate users.
