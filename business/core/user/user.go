@@ -34,8 +34,8 @@ type Storer interface {
 
 // Core manages the set of APIs for user access.
 type Core struct {
-	storer    Storer
-	ethClient *blockchain.Client
+	storer      Storer
+	ethClient   *blockchain.Client
 	redisClient *redis.Client
 }
 
@@ -43,8 +43,8 @@ type Core struct {
 func NewCore(storer Storer, ethClient *blockchain.Client, redisClient *redis.Client) (*Core, error) {
 
 	return &Core{
-		storer:    storer,
-		ethClient: ethClient,
+		storer:      storer,
+		ethClient:   ethClient,
 		redisClient: redisClient,
 	}, nil
 }
@@ -88,7 +88,6 @@ func (c *Core) Create(ctx context.Context, nu NewUser) (User, error) {
 	if err != nil {
 		return User{}, fmt.Errorf("create: %w", err)
 	}
-
 	return usr, nil
 }
 
