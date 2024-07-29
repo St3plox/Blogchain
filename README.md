@@ -109,7 +109,7 @@ Frontend can be accessed on port 8080, backend - 5000
 <!-- ROADMAP -->
 ## Roadmap
 
-- [ ] Caching
+- [X] Caching
 - [ ] Documentation
 - [ ] Media support
 - [ ] Adequate testing
