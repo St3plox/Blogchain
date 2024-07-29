@@ -18,7 +18,8 @@ type Cacheable interface {
 // CacheStorer is the interface for cache storage.
 type CacheStorer interface {
 	Set(ctx context.Context, value Cacheable) error
-	Get(ctx context.Context, key string) (Cacheable, error)
+	Get(ctx context.Context, key string, target Cacheable) error
+	Delete(ctx context.Context, key string) error
 }
 
 // RedisClient is a Redis implementation of CacheStorer.
@@ -50,9 +51,10 @@ func (rc *RedisClient) Set(ctx context.Context, value Cacheable) error {
 
 // Get retrieves a Cacheable entity from Redis.
 func (rc *RedisClient) Get(ctx context.Context, key string, target Cacheable) error {
+
 	data, err := rc.Client.Get(ctx, key).Result()
 	if err == redis.Nil {
-		return fmt.Errorf("key not found: %s", key)
+		return err
 	} else if err != nil {
 		return fmt.Errorf("failed to get value from Redis: %w", err)
 	}
@@ -61,5 +63,13 @@ func (rc *RedisClient) Get(ctx context.Context, key string, target Cacheable) er
 		return fmt.Errorf("failed to unmarshal value: %w", err)
 	}
 
+	return nil
+}
+
+// Delete removes a value from Redis by key.
+func (rc *RedisClient) Delete(ctx context.Context, key string) error {
+	if err := rc.Client.Del(ctx, key).Err(); err != nil {
+		return fmt.Errorf("failed to delete value from Redis: %w", err)
+	}
 	return nil
 }

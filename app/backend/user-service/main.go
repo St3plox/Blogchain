@@ -18,6 +18,7 @@ import (
 	"github.com/redis/go-redis/v9"
 
 	contractAuth "github.com/St3plox/Blogchain/foundation/blockchain/auth"
+	"github.com/St3plox/Blogchain/foundation/cachestore"
 
 	"github.com/St3plox/Blogchain/business/web/auth"
 	"github.com/St3plox/Blogchain/business/web/v1/debug"
@@ -150,7 +151,7 @@ func run(log *zerolog.Logger) error {
 		return fmt.Errorf("error parsing redis url %w", err)
 	}
 
-	redisClient := redis.NewClient(opt)
+	redisClient := cachestore.NewRedisClient(redis.NewClient(opt))
 
 	// -------------------------------------------------------------------------
 	//ETH client supoport
@@ -196,7 +197,7 @@ func run(log *zerolog.Logger) error {
 		return err
 	}
 
-	postCore := post.NewCore(postContract, admin)
+	postCore := post.NewCore(postContract, admin, redisClient)
 
 	// -------------------------------------------------------------------------
 	// Initialize authentication support
