@@ -9,7 +9,9 @@ import (
 
 	"github.com/St3plox/Blogchain/business/data/order"
 	"github.com/St3plox/Blogchain/foundation/blockchain"
+	"github.com/St3plox/Blogchain/foundation/cachestore"
 	"github.com/St3plox/Blogchain/foundation/keystore"
+	"github.com/redis/go-redis/v9"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -33,16 +35,18 @@ type Storer interface {
 
 // Core manages the set of APIs for user access.
 type Core struct {
-	storer    Storer
-	ethClient *blockchain.Client
+	storer      Storer
+	ethClient   *blockchain.Client
+	cacheStorer cachestore.CacheStorer
 }
 
 // NewCore constructs a core for user api access.
-func NewCore(storer Storer, ethClient *blockchain.Client) (*Core, error) {
+func NewCore(storer Storer, ethClient *blockchain.Client, cacheStorer cachestore.CacheStorer) (*Core, error) {
 
 	return &Core{
-		storer:    storer,
-		ethClient: ethClient,
+		storer:      storer,
+		ethClient:   ethClient,
+		cacheStorer: cacheStorer,
 	}, nil
 }
 
@@ -86,13 +90,22 @@ func (c *Core) Create(ctx context.Context, nu NewUser) (User, error) {
 		return User{}, fmt.Errorf("create: %w", err)
 	}
 
+	if err = c.cacheStorer.Set(ctx, user); err != nil {
+		return User{}, fmt.Errorf("cache set: %w", err)
+	}
+
 	return usr, nil
 }
 
 // Delete removes a user from the database.
 func (c *Core) Delete(ctx context.Context, usr User) error {
+
 	if err := c.storer.Delete(ctx, usr); err != nil {
 		return fmt.Errorf("delete: %w", err)
+	}
+
+	if err := c.cacheStorer.Delete(ctx, usr.CacheKey()); err != nil {
+		return fmt.Errorf("cache delete: %w", err)
 	}
 
 	return nil
@@ -115,7 +128,16 @@ func (c *Core) Count(ctx context.Context, filter QueryFilter) (int, error) {
 
 // QueryByID gets the specified user from the database.
 func (c *Core) QueryByID(ctx context.Context, userID string) (User, error) {
-	user, err := c.storer.QueryByID(ctx, userID)
+
+	var user User
+	err := c.cacheStorer.Get(ctx, IdToCacheKey(userID), &user)
+	if err == nil {
+		return user, nil
+	} else if err != redis.Nil {
+		return User{}, fmt.Errorf("cache get: %w", err)
+	}
+
+	user, err = c.storer.QueryByID(ctx, userID)
 	if err != nil {
 		return User{}, fmt.Errorf("query: userID[%s]: %w", userID, err)
 	}
@@ -125,12 +147,12 @@ func (c *Core) QueryByID(ctx context.Context, userID string) (User, error) {
 
 // QueryByIDs gets the specified user from the database.
 func (c *Core) QueryByIDs(ctx context.Context, userIDs []string) ([]User, error) {
-	user, err := c.storer.QueryByIDs(ctx, userIDs)
+	users, err := c.storer.QueryByIDs(ctx, userIDs)
 	if err != nil {
 		return nil, fmt.Errorf("query: userIDs[%s]: %w", userIDs, err)
 	}
 
-	return user, nil
+	return users, nil
 }
 
 // QueryByEmail gets the specified user from the database by email.
@@ -139,6 +161,8 @@ func (c *Core) QueryByEmail(ctx context.Context, email mail.Address) (User, erro
 	if err != nil {
 		return User{}, fmt.Errorf("query: email[%s]: %w", email, err)
 	}
+
+	
 
 	return user, nil
 }

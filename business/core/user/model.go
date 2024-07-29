@@ -43,9 +43,23 @@ type UserCredentials struct {
 
 //==============================================================================
 
+func (u User) CacheKey() string {
+	return IdToCacheKey(u.ID.Hex())
+}
+
+func (u User) CacheExpiration() time.Duration {
+	return 24 * time.Hour
+}
+
+func IdToCacheKey(id string) string {
+	return "user:" + id
+}
+
+//==============================================================================
+
 func Map(user User) UserDTO {
 	return UserDTO{
-		ID:          user.ID.String(),
+		ID:          user.ID.Hex(),
 		Name:        user.Name,
 		Email:       user.Email,
 		Roles:       user.Roles,

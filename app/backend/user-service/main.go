@@ -15,8 +15,10 @@ import (
 	"github.com/St3plox/Blogchain/business/core/post"
 	"github.com/St3plox/Blogchain/business/core/user"
 	"github.com/St3plox/Blogchain/business/core/user/userdb"
+	"github.com/redis/go-redis/v9"
 
 	contractAuth "github.com/St3plox/Blogchain/foundation/blockchain/auth"
+	"github.com/St3plox/Blogchain/foundation/cachestore"
 
 	"github.com/St3plox/Blogchain/business/web/auth"
 	"github.com/St3plox/Blogchain/business/web/v1/debug"
@@ -72,6 +74,9 @@ func run(log *zerolog.Logger) error {
 		}
 		DB struct {
 			Uri string `conf:"default:mongodb://localhost:27017"`
+		}
+		Redis struct {
+			Url string `conf:"default:redis://@localhost:6379"`
 		}
 		ETH struct {
 			Rawurl   string `conf:"default:http://127.0.0.1:8545"`
@@ -133,6 +138,22 @@ func run(log *zerolog.Logger) error {
 	}
 
 	// -------------------------------------------------------------------------
+	// Redis Support
+	redisUrl := os.Getenv("REDIS_URL")
+	if redisUrl == "" {
+		redisUrl = cfg.Redis.Url
+	}
+
+	log.Info().Str("status", "startup").Str("url", redisUrl).Msg("initializing redis support")
+
+	opt, err := redis.ParseURL(redisUrl)
+	if err != nil {
+		return fmt.Errorf("error parsing redis url %w", err)
+	}
+
+	redisClient := cachestore.NewRedisClient(redis.NewClient(opt))
+
+	// -------------------------------------------------------------------------
 	//ETH client supoport
 
 	ethRawUrl := os.Getenv("HARDHAT_NODE_URL")
@@ -144,29 +165,29 @@ func run(log *zerolog.Logger) error {
 
 	ethclient, err := blockchain.NewClient(ethRawUrl)
 	if err != nil {
-		return fmt.Errorf("error creating eth client %e", err)
+		return fmt.Errorf("error creating eth client %w", err)
 	}
 
 	userStore := userdb.NewStore(log, client)
-	userCore, err := user.NewCore(userStore, ethclient)
+	userCore, err := user.NewCore(userStore, ethclient, redisClient)
 	if err != nil {
 		return err
 	}
 
 	admin, err := contractAuth.NewAdmin(cfg.ETH.AdminKey, ethclient.Client)
 	if err != nil {
-		return fmt.Errorf("error creating admin %e", err)
+		return fmt.Errorf("error creating admin %w", err)
 	}
 	cAuth, err := admin.GenerateAuth(ctx)
 	if err != nil {
-		return fmt.Errorf("error creating auth %e", err)
+		return fmt.Errorf("error creating auth %w", err)
 	}
 
 	cAuth.GasLimit = cfg.ETH.GasLimit
 
 	postContractAddress, _, instance, err := contract.DeployContract(cAuth, ethclient.Client)
 	if err != nil {
-		return fmt.Errorf("error creating post contract %e", err)
+		return fmt.Errorf("error creating post contract %w", err)
 	}
 
 	log.Info().Str("status", "startup").Msg("deployed contract with address" + postContractAddress.Hex())
@@ -176,7 +197,7 @@ func run(log *zerolog.Logger) error {
 		return err
 	}
 
-	postCore := post.NewCore(postContract, admin)
+	postCore := post.NewCore(postContract, admin, redisClient)
 
 	// -------------------------------------------------------------------------
 	// Initialize authentication support

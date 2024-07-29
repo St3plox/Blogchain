@@ -7,19 +7,23 @@ import (
 
 	"github.com/St3plox/Blogchain/foundation/blockchain/auth"
 	"github.com/St3plox/Blogchain/foundation/blockchain/contract"
+	"github.com/St3plox/Blogchain/foundation/cachestore"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/redis/go-redis/v9"
 )
 
 type Core struct {
 	postContract *contract.PostContract
 	admin        *auth.Admin
+	cacheStorer  cachestore.CacheStorer
 }
 
-func NewCore(postContract *contract.PostContract, admin *auth.Admin) *Core {
+func NewCore(postContract *contract.PostContract, admin *auth.Admin, cacheStorer cachestore.CacheStorer) *Core {
 	return &Core{
 		postContract: postContract,
 		admin:        admin,
+		cacheStorer:  cacheStorer,
 	}
 }
 
@@ -77,6 +81,11 @@ func (c *Core) Create(ctx context.Context, np NewPost, userAddressHex string) (P
 		}
 	}
 
+	err = c.cacheStorer.Set(ctx, &newPost)
+	if err != nil {
+		return Post{}, fmt.Errorf("cache error: %w", err)
+	}
+
 	return newPost, nil
 }
 
@@ -101,15 +110,7 @@ func (c *Core) QueryByAddress(ctx context.Context, userAddressHex string, page u
 
 	var result []Post
 	for _, post := range posts {
-		result = append(result, Post{
-			ID:        post.Id,
-			Author:    post.Author,
-			Title:     post.Title,
-			Content:   post.Content,
-			Timestamp: post.Timestamp,
-			Tags:      post.Tags,
-			Category:  Category(post.Category),
-		})
+		result = append(result,mapTo(post))
 	}
 
 	return result, nil
@@ -123,33 +124,31 @@ func (c *Core) QueryByIndex(ctx context.Context, userAddressHex string, index ui
 		return Post{}, err
 	}
 
-	return Post{
-		ID:        post.Id,
-		Author:    post.Author,
-		Title:     post.Title,
-		Content:   post.Content,
-		Timestamp: post.Timestamp,
-		Tags:      post.Tags,
-		Category:  Category(post.Category),
-	}, nil
+	return mapTo(post), nil
 }
 
 func (c *Core) GetPostByID(ctx context.Context, id *big.Int) (Post, error) {
+
+	{ // Checking for cached post
+		var post Post
+		err := c.cacheStorer.Get(ctx, IdToCacheKey(id.String()), &post)
+		if err == nil {
+			return post, nil
+		} else if err != redis.Nil {
+			return Post{}, fmt.Errorf("cache get: %w", err)
+		}
+	}
 
 	post, err := c.postContract.Contract.GetPostByID(&bind.CallOpts{Context: ctx}, id)
 	if err != nil {
 		return Post{}, err
 	}
 
-	return Post{
-		ID:        post.Id,
-		Author:    post.Author,
-		Title:     post.Title,
-		Content:   post.Content,
-		Timestamp: post.Timestamp,
-		Tags:      post.Tags,
-		Category:  Category(post.Category),
-	}, nil
+	postRes := mapTo(post)
+
+	c.cacheStorer.Set(ctx, &postRes)
+
+	return postRes, nil
 }
 
 func (c *Core) Query(ctx context.Context, page uint64, pageSize uint64) ([]Post, error) {
@@ -178,15 +177,9 @@ func (c *Core) Query(ctx context.Context, page uint64, pageSize uint64) ([]Post,
 	// Convert the paginated posts to the Post type used by Go
 	var result []Post
 	for _, post := range paginatedPosts {
-		result = append(result, Post{
-			ID:        post.Id,
-			Author:    post.Author,
-			Title:     post.Title,
-			Content:   post.Content,
-			Timestamp: post.Timestamp,
-			Tags:      post.Tags,
-			Category:  Category(post.Category),
-		})
+		postRes := mapTo(post)
+		c.cacheStorer.Set(ctx, &postRes)
+		result = append(result, mapTo(post))
 	}
 
 	return result, nil

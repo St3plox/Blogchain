@@ -17,6 +17,13 @@ services:
       - "8545:8545"
     restart: unless-stopped
 
+  redis:
+    image: redis/redis-stack-server:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
   backend:
     build:
       context: .
@@ -27,9 +34,11 @@ services:
     environment:
       - DB_URI=mongodb://mongodb:27017
       - HARDHAT_NODE_URL=http://hardhat-node:8545
+      - REDIS_URL=redis://redis:6379
     depends_on:
       - mongodb
       - hardhat-node
+      - redis
     restart: unless-stopped
 
   frontend:
