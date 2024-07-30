@@ -66,6 +66,7 @@ authenticate users.
 * [![JavaScript][JavaScript]][JavaScript-url]
 * [![Solidity][Solidity]][Solidity-url]
 * [![MongoDB][MongoDB]][MongoDB-url]
+* [![Redis][Redis]][Redis-url]
 * [![Hardhat][Hardhat]][Hardhat-url]
 * [![Abigen][Abigen]][Abigen-url]
 * [![Ethereum][Ethereum]][Ethereum-url]
@@ -186,3 +187,5 @@ Egor - st3pegor@gmail.com
 [Abigen-url]: https://pkg.go.dev/github.com/ethereum/go-ethereum/accounts/abi/bind
 [Ethereum]: https://img.shields.io/badge/ethereum-3C3C3D?style=for-the-badge&logo=ethereum&logoColor=white
 [Ethereum-url]: https://ethereum.org/
+[Redis]: https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white
+[Redis-url]: https://redis.io/
