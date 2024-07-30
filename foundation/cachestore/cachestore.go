@@ -1,3 +1,14 @@
+// Package cachestore provides a caching mechanism using Redis as the storage backend.
+//
+// This package defines interfaces and implementations for storing, retrieving, and deleting cacheable entities in Redis.
+//
+// The core components of this package include:
+//
+// - **Cacheable Interface**: An interface that should be implemented by all entities that are intended to be cached. It provides methods for getting the cache key and expiration duration.
+//
+// - **CacheStorer Interface**: An interface for cache storage operations. It includes methods for setting, getting, and deleting cacheable entities.
+//
+// - **RedisClient**: A concrete implementation of the CacheStorer interface using Redis. It provides methods to interact with Redis to store, retrieve, and delete cacheable entities.
 package cachestore
 
 import (

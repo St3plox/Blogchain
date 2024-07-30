@@ -1,3 +1,4 @@
+// Package auth provides ability to generate bind.TransactOpts using admin account
 package auth
 
 import (
