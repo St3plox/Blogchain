@@ -14,7 +14,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-const dbName = "userDB"
+// TODO: add to cfg
+const dbName = "blogchainDB"
 const collectionName = "userCollection"
 
 type Store struct {
