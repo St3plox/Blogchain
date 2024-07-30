@@ -16,9 +16,11 @@ import (
 	"github.com/St3plox/Blogchain/business/core/user"
 	"github.com/St3plox/Blogchain/business/core/user/userdb"
 	"github.com/redis/go-redis/v9"
+	httpSwagger "github.com/swaggo/http-swagger"
 
 	contractAuth "github.com/St3plox/Blogchain/foundation/blockchain/auth"
 	"github.com/St3plox/Blogchain/foundation/cachestore"
+	"github.com/St3plox/Blogchain/foundation/web"
 
 	"github.com/St3plox/Blogchain/business/web/auth"
 	"github.com/St3plox/Blogchain/business/web/v1/debug"
@@ -32,10 +34,30 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 
 	gorillaHandlers "github.com/gorilla/handlers"
+
+	_ "github.com/St3plox/Blogchain/docs"
 )
 
 var build = "develop"
 
+// @title Blogchain API
+// @version 1.0
+// @description This is a sample server Blogchain server.
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name API Support
+// @contact.url http://www.swagger.io/support
+// @contact.email support@swagger.io
+
+// @license.name MIT License
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host localhost:3000
+// @BasePath /
+
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
 func main() {
 	log := logger.New("USER - SERVICE")
 
@@ -228,8 +250,10 @@ func run(log *zerolog.Logger) error {
 		Str("host", cfg.Web.DebugHost).
 		Msg("startup")
 
+	debugMux := debug.StandardLibraryMux()
+	debugMux.Handle("/swagger/", httpSwagger.WrapHandler)
 	go func() {
-		if err := http.ListenAndServe(cfg.Web.DebugHost, debug.StandardLibraryMux()); err != nil {
+		if err := http.ListenAndServe(cfg.Web.DebugHost, debugMux); err != nil {
 			log.Error().
 				Str("status", "debug v1 router closed").
 				Str("host", cfg.Web.DebugHost).
@@ -253,6 +277,8 @@ func run(log *zerolog.Logger) error {
 		UserCore: userCore,
 		PostCore: postCore,
 	})
+
+	apiMux.Handle("/swagger", "GET", swaggerHandler())
 
 	corsMiddleware := gorillaHandlers.CORS(
 		gorillaHandlers.AllowedOrigins([]string{"*"}), // Allow all origins, customize as needed
@@ -308,4 +334,11 @@ func run(log *zerolog.Logger) error {
 	}
 
 	return nil
+}
+func swaggerHandler() web.Handler {
+	swaggerHandler := httpSwagger.WrapHandler
+	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+		swaggerHandler(w, r)
+		return nil
+	}
 }

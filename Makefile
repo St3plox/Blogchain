@@ -10,6 +10,10 @@ REDIS_NAME		:= redis
 REDIS_PORT		:= 6379
 
 
+dev-tools:
+	 go install github.com/swaggo/swag/cmd/swag@latest
+	 go install github.com/ethereum/go-ethereum/cmd/abigen@latest
+
 npm-tools:
 	npm install --save-dev @nomiclabs/hardhat-ethers ethers waffle chai
 

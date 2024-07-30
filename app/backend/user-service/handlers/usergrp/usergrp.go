@@ -24,6 +24,15 @@ func New(user *user.Core, auth *auth.Auth) *Handler {
 	return &Handler{user: user, auth: auth}
 }
 
+// @Summary Register a new user
+// @Description Register a new user with email and password
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param newUser body user.NewUser true "New User"
+// @Success 201 {object} user.User
+// @Failure 400 {object} v1.ErrorResponse
+// @Router /users/register [post]
 func (h *Handler) RegisterUser(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 	var nu user.NewUser
 	err := json.NewDecoder(r.Body).Decode(&nu)
@@ -62,6 +71,16 @@ func (h *Handler) RegisterUser(ctx context.Context, w http.ResponseWriter, r *ht
 	return nil
 }
 
+// @Summary Login a user
+// @Description Login a user with email and password
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param credentials body user.UserCredentials true "User Credentials"
+// @Success 200 {object} user.User
+// @Failure 400 {object} v1.ErrorResponse
+// @Failure 404 {object} v1.ErrorResponse
+// @Router /users/login [post]
 func (h *Handler) LoginUser(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 
 	var credentials user.UserCredentials

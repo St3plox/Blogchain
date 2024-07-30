@@ -11,6 +11,8 @@ import (
 	"github.com/St3plox/Blogchain/business/web/v1/mid"
 	"github.com/St3plox/Blogchain/foundation/web"
 	"github.com/rs/zerolog"
+
+
 )
 
 type APIMuxConfig struct {
@@ -39,6 +41,16 @@ func APIMux(cfg APIMuxConfig) *web.App {
 	app.Handle("/posts/{address}", "GET", ph.GetPostsByUserAddress)
 	app.Handle("/posts/id/{id}", "GET", ph.GetById)
 	app.Handle("/posts/{address}/{index}", "GET", ph.GetPostsByUserAddressAndIndex)
-	
+
+	// app.Handle("/swagger/*any", "GET",  swaggerHandler())
+
 	return app
 }
+
+// func swaggerHandler() web.Handler {
+//     swaggerHandler := httpSwagger.WrapHandler
+//     return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+//         swaggerHandler(w, r)
+//         return nil
+//     }
+// }

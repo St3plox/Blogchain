@@ -30,6 +30,16 @@ func New(postCore *post.Core, auth *auth.Auth, userCore *user.Core) *Handler {
 	}
 }
 
+
+// @Summary Create a new post
+// @Description Create a new post with title and content
+// @Tags posts
+// @Accept json
+// @Produce json
+// @Param newPost body post.NewPost true "New Post"
+// @Success 201 {object} post.Post
+// @Failure 400 {object} v1.ErrorResponse
+// @Router /posts [post]
 func (h *Handler) Post(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 	var np post.NewPost
 	err := json.NewDecoder(r.Body).Decode(&np)
@@ -84,6 +94,14 @@ func (h *Handler) GetUserPosts(ctx context.Context, w http.ResponseWriter, r *ht
 	return nil
 }
 
+// @Summary Get posts by user address
+// @Description Get all posts by a specific user address
+// @Tags posts
+// @Produce json
+// @Param address path string true "User Address"
+// @Success 200 {array} post.Post
+// @Failure 400 {object} v1.ErrorResponse
+// @Router /posts/{address} [get]
 func (h *Handler) GetPostsByUserAddress(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 	params := mux.Vars(r)
 
