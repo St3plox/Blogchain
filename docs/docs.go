@@ -25,6 +25,49 @@ const docTemplate = `{
     "basePath": "{{.BasePath}}",
     "paths": {
         "/posts": {
+            "get": {
+                "description": "Get all posts by a specific user address",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "posts"
+                ],
+                "summary": "Get posts of user who made the request",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 0,
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 100,
+                        "description": "Page size",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_St3plox_Blogchain_business_core_post.Post"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse"
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "Create a new post with title and content",
                 "consumes": [
@@ -64,6 +107,98 @@ const docTemplate = `{
                 }
             }
         },
+        "/posts/all": {
+            "get": {
+                "description": "Get all posts with pagination",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "posts"
+                ],
+                "summary": "Get all posts",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 0,
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 100,
+                        "description": "Page size",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_St3plox_Blogchain_business_core_post.Post"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/posts/id/{id}": {
+            "get": {
+                "description": "Get a specific post by its ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "posts"
+                ],
+                "summary": "Get a post by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Post ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_St3plox_Blogchain_business_core_post.Post"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/posts/{address}": {
             "get": {
                 "description": "Get all posts by a specific user address",
@@ -81,6 +216,20 @@ const docTemplate = `{
                         "name": "address",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 0,
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 100,
+                        "description": "Page size",
+                        "name": "pageSize",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -95,6 +244,54 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/posts/{address}/{index}": {
+            "get": {
+                "description": "Get a specific post by user address and index",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "posts"
+                ],
+                "summary": "Get a post by user address and index",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User Address",
+                        "name": "address",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Post Index",
+                        "name": "index",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_St3plox_Blogchain_business_core_post.Post"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse"
                         }
@@ -363,7 +560,7 @@ const docTemplate = `{
         }
     },
     "securityDefinitions": {
-        "ApiKeyAuth": {
+        "jwtToken": {
             "type": "apiKey",
             "name": "Authorization",
             "in": "header"

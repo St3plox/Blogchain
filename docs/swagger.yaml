@@ -128,6 +128,35 @@ info:
   version: "1.0"
 paths:
   /posts:
+    get:
+      description: Get all posts by a specific user address
+      parameters:
+      - default: 0
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 100
+        description: Page size
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_St3plox_Blogchain_business_core_post.Post'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse'
+      summary: Get posts of user who made the request
+      tags:
+      - posts
     post:
       consumes:
       - application/json
@@ -162,6 +191,16 @@ paths:
         name: address
         required: true
         type: string
+      - default: 0
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 100
+        description: Page size
+        in: query
+        name: pageSize
+        type: integer
       produces:
       - application/json
       responses:
@@ -176,6 +215,99 @@ paths:
           schema:
             $ref: '#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse'
       summary: Get posts by user address
+      tags:
+      - posts
+  /posts/{address}/{index}:
+    get:
+      description: Get a specific post by user address and index
+      parameters:
+      - description: User Address
+        in: path
+        name: address
+        required: true
+        type: string
+      - description: Post Index
+        in: path
+        name: index
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_St3plox_Blogchain_business_core_post.Post'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse'
+      summary: Get a post by user address and index
+      tags:
+      - posts
+  /posts/all:
+    get:
+      description: Get all posts with pagination
+      parameters:
+      - default: 0
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 100
+        description: Page size
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_St3plox_Blogchain_business_core_post.Post'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse'
+      summary: Get all posts
+      tags:
+      - posts
+  /posts/id/{id}:
+    get:
+      description: Get a specific post by its ID
+      parameters:
+      - description: Post ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_St3plox_Blogchain_business_core_post.Post'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse'
+      summary: Get a post by ID
       tags:
       - posts
   /users/login:
@@ -235,7 +367,7 @@ paths:
       tags:
       - users
 securityDefinitions:
-  ApiKeyAuth:
+  jwtToken:
     in: header
     name: Authorization
     type: apiKey

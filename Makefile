@@ -25,6 +25,9 @@ gen-private:
 	mkdir zarf/keys
 	openssl genpkey -algorithm RSA -out zarf/keys/private_key.pem -pkeyopt rsa_keygen_bits:4096
 
+gen-docs:
+	swag init -g app/backend/user-service/main.go --parseDependency --parseInternal
+
 run-local:
 	go run app/backend/user-service/main.go
 

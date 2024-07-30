@@ -55,7 +55,7 @@ var build = "develop"
 // @host localhost:3000
 // @BasePath /
 
-// @securityDefinitions.apikey ApiKeyAuth
+// @securityDefinitions.apikey jwtToken
 // @in header
 // @name Authorization
 func main() {

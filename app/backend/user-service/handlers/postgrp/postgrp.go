@@ -30,7 +30,6 @@ func New(postCore *post.Core, auth *auth.Auth, userCore *user.Core) *Handler {
 	}
 }
 
-
 // @Summary Create a new post
 // @Description Create a new post with title and content
 // @Tags posts
@@ -65,6 +64,15 @@ func (h *Handler) Post(ctx context.Context, w http.ResponseWriter, r *http.Reque
 	return nil
 }
 
+// @Summary Get posts of user who made the request
+// @Description Get all posts by a specific user address
+// @Tags posts
+// @Produce json
+// @Param page query int false "Page number" default(0)
+// @Param pageSize query int false "Page size" default(100)
+// @Success 200 {array} post.Post
+// @Failure 400 {object} v1.ErrorResponse
+// @Router /posts [get]
 func (h *Handler) GetUserPosts(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 	claims := auth.GetClaims(ctx)
 
@@ -99,6 +107,8 @@ func (h *Handler) GetUserPosts(ctx context.Context, w http.ResponseWriter, r *ht
 // @Tags posts
 // @Produce json
 // @Param address path string true "User Address"
+// @Param page query int false "Page number" default(0)
+// @Param pageSize query int false "Page size" default(100)
 // @Success 200 {array} post.Post
 // @Failure 400 {object} v1.ErrorResponse
 // @Router /posts/{address} [get]
@@ -126,6 +136,16 @@ func (h *Handler) GetPostsByUserAddress(ctx context.Context, w http.ResponseWrit
 	return nil
 }
 
+// @Summary Get a post by user address and index
+// @Description Get a specific post by user address and index
+// @Tags posts
+// @Produce json
+// @Param address path string true "User Address"
+// @Param index path int true "Post Index"
+// @Success 200 {object} post.Post
+// @Failure 400 {object} v1.ErrorResponse
+// @Failure 404 {object} v1.ErrorResponse
+// @Router /posts/{address}/{index} [get]
 func (h *Handler) GetPostsByUserAddressAndIndex(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 	params := mux.Vars(r)
 
@@ -150,6 +170,15 @@ func (h *Handler) GetPostsByUserAddressAndIndex(ctx context.Context, w http.Resp
 	return nil
 }
 
+// @Summary Get a post by ID
+// @Description Get a specific post by its ID
+// @Tags posts
+// @Produce json
+// @Param id path int true "Post ID"
+// @Success 200 {object} post.Post
+// @Failure 400 {object} v1.ErrorResponse
+// @Failure 404 {object} v1.ErrorResponse
+// @Router /posts/id/{id} [get]
 func (h *Handler) GetById(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 	params := mux.Vars(r)
 
@@ -170,6 +199,16 @@ func (h *Handler) GetById(ctx context.Context, w http.ResponseWriter, r *http.Re
 	return nil
 }
 
+// @Summary Get all posts
+// @Description Get all posts with pagination
+// @Tags posts
+// @Produce json
+// @Param page query int false "Page number" default(0)
+// @Param pageSize query int false "Page size" default(100)
+// @Success 200 {array} post.Post
+// @Failure 400 {object} v1.ErrorResponse
+// @Failure 404 {object} v1.ErrorResponse
+// @Router /posts/all [get]
 func (h *Handler) GetAll(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 	page, pageSize, err := extractPaginationParams(r)
 	if err != nil {
@@ -188,6 +227,7 @@ func (h *Handler) GetAll(ctx context.Context, w http.ResponseWriter, r *http.Req
 	return nil
 }
 
+// extractPaginationParams extracts pagination parameters from the request query parameters
 func extractPaginationParams(r *http.Request) (uint64, uint64, error) {
 	const defaultPage uint64 = 0
 	const defaultPageSize uint64 = 100
