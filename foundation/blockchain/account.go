@@ -11,6 +11,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+// AccountData contains the details of an Ethereum account
 type AccountData struct {
 	PrivateKey []byte
 	PublicKey  []byte
@@ -19,6 +20,8 @@ type AccountData struct {
 
 // NOTE: needs to be changed in future
 
+// CreateEthAccount generates a new Ethereum account with a private key, public key, and address.
+// It also checks if the generated address is available (i.e., not used for contracts or transactions).
 func (c *Client) CreateEthAccount() (AccountData, error) {
 
 	// Generate a new private key
