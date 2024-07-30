@@ -15,6 +15,7 @@
     <a href="https://github.com/St3plox/Blogchain/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
     ·
     <a href="https://github.com/St3plox/Blogchain/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
+    <a href="https://pkg.go.dev/github.com/St3plox/Blogchain">Documentation</a>
   </p>
 </div>
 
@@ -112,7 +113,7 @@ Frontend can be accessed on port 8080, backend - 5000
 ## Roadmap
 
 - [X] Caching
-- [ ] Documentation
+- [X] Documentation
 - [ ] Media support
 - [ ] Adequate testing
 - [ ] CI/CD (or smth like this)
