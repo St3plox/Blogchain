@@ -102,7 +102,7 @@ than frontend and backend api
    ```bash
    docker-compose up -d
    ```
-Frontend can be accessed on port 8080, backend - 5000
+Frontend can be accessed on port 8080, backend - 3000
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
