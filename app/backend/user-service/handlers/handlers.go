@@ -29,8 +29,14 @@ func APIMux(cfg APIMuxConfig) *web.App {
 
 	uh := usergrp.New(cfg.UserCore, cfg.Auth)
 
+	//=================================================================================
+	//User exnpoints
+
 	app.Handle(usergrp.RegisterUserPath, "POST", uh.RegisterUser)
 	app.Handle(usergrp.LoginUserPath, "POST", uh.LoginUser)
+
+	//=================================================================================
+	//Post endpoints
 
 	ph := postgrp.New(cfg.PostCore, cfg.Auth, cfg.UserCore)
 
@@ -43,12 +49,15 @@ func APIMux(cfg APIMuxConfig) *web.App {
 	app.Handle(postgrp.GetByIdPath, "GET", ph.GetById)
 	app.Handle(postgrp.GetPostsByUserAddressAndIndexPath, "GET", ph.GetPostsByUserAddressAndIndex)
 
-	mc := mediagrp.New(cfg.MediaCore, cfg.UserCore)
+	//=================================================================================
+	//Media endpoints
+
+	mc := mediagrp.New(cfg.MediaCore)
 
 	app.Handle(mediagrp.GetPath, "GET", mc.Get)
-	app.Handle(mediagrp.PostPath, "POST", mc.Post)
-	app.Handle(mediagrp.UpdatePath, "PUT", mc.Update)
-	app.Handle(mediagrp.DeletePath, "DELETE", mc.Delete)
- 
+	app.Handle(mediagrp.GetByIDsPath, "GET", mc.GetByIDs)
+	app.Handle(mediagrp.PostPath, "POST", mc.Post, mid.Authenticate(cfg.Auth), mid.Authorize(cfg.Auth, auth.RuleAny))
+	app.Handle(mediagrp.DeletePath, "DELETE", mc.Delete, mid.Authenticate(cfg.Auth), mid.Authorize(cfg.Auth, auth.RuleAny))
+
 	return app
 }

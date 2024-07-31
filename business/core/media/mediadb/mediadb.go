@@ -110,3 +110,37 @@ func (s *Store) QueryByID(ctx context.Context, mediaID string) (media.Media, err
 
 	return m, nil
 }
+
+func (s *Store) QueryByIDs(ctx context.Context, mediaIDs []string) ([]media.Media, error) {
+	var ids []primitive.ObjectID
+	for _, id := range mediaIDs {
+		objID, err := primitive.ObjectIDFromHex(id)
+		if err != nil {
+			return nil, fmt.Errorf("invalid id %s: %w", id, err)
+		}
+		ids = append(ids, objID)
+	}
+
+	filter := bson.M{"_id": bson.M{"$in": ids}}
+
+	cursor, err := s.collection.Find(ctx, filter)
+	if err != nil {
+		return nil, fmt.Errorf("get by ids: %w", err)
+	}
+	defer cursor.Close(ctx)
+
+	var medias []media.Media
+	for cursor.Next(ctx) {
+		var m media.Media
+		if err := cursor.Decode(&m); err != nil {
+			return nil, fmt.Errorf("decode media: %w", err)
+		}
+		medias = append(medias, m)
+	}
+
+	if err := cursor.Err(); err != nil {
+		return nil, fmt.Errorf("cursor error: %w", err)
+	}
+
+	return medias, nil
+}

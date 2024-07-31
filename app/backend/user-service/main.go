@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"runtime"
+	"strconv"
 	"time"
 
 	defaultLog "log"
@@ -101,6 +102,9 @@ func run(log *zerolog.Logger) error {
 		}
 		Redis struct {
 			Url string `conf:"default:redis://@localhost:6379"`
+		}
+		Media struct {
+			MaxFileSizeMb string `conf:"default:10"`
 		}
 		ETH struct {
 			Rawurl   string `conf:"default:http://127.0.0.1:8545"`
@@ -226,8 +230,14 @@ func run(log *zerolog.Logger) error {
 	// -------------------------------------------------------------------------
 	//media support
 
+	maxSize, err := strconv.ParseInt(cfg.Media.MaxFileSizeMb, 10, 64)
+	if err != nil {
+		return err
+	}
+
 	mediaDb := mediadb.NewStore(log, client)
-	mediaCore := media.NewCore(mediaDb, redisClient)
+	mediaCore := media.NewCore(mediaDb, redisClient, userCore)
+	mediaCore.MaxFileSizeMb = maxSize
 
 	// -------------------------------------------------------------------------
 	// Initialize authentication support
@@ -279,11 +289,11 @@ func run(log *zerolog.Logger) error {
 	log.Info().Msg("initializing V1 API support")
 	shutdown := make(chan os.Signal, 1)
 	apiMux := handlers.APIMux(handlers.APIMuxConfig{
-		Shutdown: shutdown,
-		Log:      log,
-		Auth:     auth,
-		UserCore: userCore,
-		PostCore: postCore,
+		Shutdown:  shutdown,
+		Log:       log,
+		Auth:      auth,
+		UserCore:  userCore,
+		PostCore:  postCore,
 		MediaCore: mediaCore,
 	})
 

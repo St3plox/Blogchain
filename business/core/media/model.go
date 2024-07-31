@@ -8,6 +8,7 @@ import (
 
 type Media struct {
 	ID        primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
+	OwnerID   primitive.ObjectID `json:"owner_id,omitempty"`
 	Filename  string             `json:"name"`
 	Length    int64              `json:"length"`
 	FileBytes []byte             `json:"fileBytes"`
@@ -18,7 +19,6 @@ type NewMedia struct {
 	Length    int64  `json:"length"`
 	FileBytes []byte `json:"fileBytes"`
 }
-
 
 // GenUrl generates part of url for downloading the mediafile
 func (m Media) GenUrl() string {
