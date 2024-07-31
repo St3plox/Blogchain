@@ -27,6 +27,8 @@ type Storer interface {
 type Core struct {
 	storer      Storer
 	cacheStorer cachestore.CacheStorer
+
+	MaxFileSizeMb int64
 }
 
 func NewCore(storer Storer, cacheStorer cachestore.CacheStorer) *Core {
@@ -107,18 +109,19 @@ func (c *Core) QueryByID(ctx context.Context, mediaID string) (Media, error) {
 
 	var media Media
 	err := c.cacheStorer.Get(ctx, IdToCacheKey(mediaID), &media)
-	if err == nil {
-		return media, nil
-	} else if err != redis.Nil {
-		return Media{}, fmt.Errorf("core cache get: %w", err)
+	if err != nil {
+		if err != redis.Nil {
+			return Media{}, fmt.Errorf("core cache get: %w", err)
+		}
 	}
 
 	media, err = c.storer.QueryByID(ctx, mediaID)
-	if err != ErrNotFound {
-		return Media{}, fmt.Errorf("core error get: %w", err)
-	} else if err != nil {
-		return Media{}, err
+	if err != nil {
+		if err != ErrNotFound {
+			return Media{}, err
+		}
+		return  Media{}, fmt.Errorf("core error get: %w", err) 
 	}
-
+	
 	return media, nil
 }

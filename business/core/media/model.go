@@ -19,6 +19,7 @@ type NewMedia struct {
 	FileBytes []byte `json:"fileBytes"`
 }
 
+
 // GenUrl generates part of url for downloading the mediafile
 func (m Media) GenUrl() string {
 	return "/media/" + m.ID.Hex()

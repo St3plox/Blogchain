@@ -3,8 +3,10 @@ package handlers
 import (
 	"os"
 
+	"github.com/St3plox/Blogchain/app/backend/user-service/handlers/v1/mediagrp"
 	"github.com/St3plox/Blogchain/app/backend/user-service/handlers/v1/postgrp"
 	"github.com/St3plox/Blogchain/app/backend/user-service/handlers/v1/usergrp"
+	"github.com/St3plox/Blogchain/business/core/media"
 	"github.com/St3plox/Blogchain/business/core/post"
 	"github.com/St3plox/Blogchain/business/core/user"
 	"github.com/St3plox/Blogchain/business/web/auth"
@@ -14,11 +16,12 @@ import (
 )
 
 type APIMuxConfig struct {
-	Shutdown chan os.Signal
-	Log      *zerolog.Logger
-	Auth     *auth.Auth
-	UserCore *user.Core
-	PostCore *post.Core
+	Shutdown  chan os.Signal
+	Log       *zerolog.Logger
+	Auth      *auth.Auth
+	UserCore  *user.Core
+	PostCore  *post.Core
+	MediaCore *media.Core
 }
 
 func APIMux(cfg APIMuxConfig) *web.App {
@@ -40,5 +43,12 @@ func APIMux(cfg APIMuxConfig) *web.App {
 	app.Handle(postgrp.GetByIdPath, "GET", ph.GetById)
 	app.Handle(postgrp.GetPostsByUserAddressAndIndexPath, "GET", ph.GetPostsByUserAddressAndIndex)
 
+	mc := mediagrp.New(cfg.MediaCore, cfg.UserCore)
+
+	app.Handle(mediagrp.GetPath, "GET", mc.Get)
+	app.Handle(mediagrp.PostPath, "POST", mc.Post)
+	app.Handle(mediagrp.UpdatePath, "PUT", mc.Update)
+	app.Handle(mediagrp.DeletePath, "DELETE", mc.Delete)
+ 
 	return app
 }

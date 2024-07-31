@@ -12,6 +12,8 @@ import (
 	defaultLog "log"
 
 	"github.com/St3plox/Blogchain/app/backend/user-service/handlers"
+	"github.com/St3plox/Blogchain/business/core/media"
+	"github.com/St3plox/Blogchain/business/core/media/mediadb"
 	"github.com/St3plox/Blogchain/business/core/post"
 	"github.com/St3plox/Blogchain/business/core/user"
 	"github.com/St3plox/Blogchain/business/core/user/userdb"
@@ -222,6 +224,12 @@ func run(log *zerolog.Logger) error {
 	postCore := post.NewCore(postContract, admin, redisClient)
 
 	// -------------------------------------------------------------------------
+	//media support
+
+	mediaDb := mediadb.NewStore(log, client)
+	mediaCore := media.NewCore(mediaDb, redisClient)
+
+	// -------------------------------------------------------------------------
 	// Initialize authentication support
 
 	log.Info().Str("status", "startup").Msg("initializing V1 API AUTH support")
@@ -276,6 +284,7 @@ func run(log *zerolog.Logger) error {
 		Auth:     auth,
 		UserCore: userCore,
 		PostCore: postCore,
+		MediaCore: mediaCore,
 	})
 
 	apiMux.Handle("/swagger", "GET", swaggerHandler())
