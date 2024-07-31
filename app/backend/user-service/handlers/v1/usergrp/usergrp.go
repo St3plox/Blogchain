@@ -96,11 +96,9 @@ func (h *Handler) LoginUser(ctx context.Context, w http.ResponseWriter, r *http.
 		return v1.NewRequestError(errors.New("invalid email address"), http.StatusBadRequest)
 	}
 
-	h.user.Authenticate(ctx, *emailAddr, credentials.Password)
-
-	usr, err := h.user.QueryByEmail(ctx, *emailAddr)
+	usr, err := h.user.Authenticate(ctx, *emailAddr, credentials.Password)
 	if err != nil {
-		return v1.NewRequestError(errors.New("user not found"), http.StatusNotFound)
+		return v1.NewRequestError(errors.New("authentication failed "+err.Error()), http.StatusForbidden)
 	}
 
 	// Verify password

@@ -23,7 +23,7 @@ type User struct {
 type NewUser struct {
 	Name     string
 	Email    string
-	Password []byte `json:"password"`
+	Password string `json:"password"`
 }
 
 type UserDTO struct {
