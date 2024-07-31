@@ -23,8 +23,18 @@ func New(media *media.Core) *Handler {
 	}
 }
 
+// Post handles the uploading of a new media file.
+// @Summary Upload a media file
+// @Description Upload a new media file (image only)
+// @Tags media
+// @Accept multipart/form-data
+// @Produce application/json
+// @Param file formData file true "File to upload"
+// @Success 201 {object} media.Media
+// @Failure 400 {object} v1.ErrorResponse
+// @Failure 500 {object} v1.ErrorResponse
+// @Router /media [post]
 func (h *Handler) Post(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-
 	// Parse the multipart form, allowing for a maximum upload MaxFileSizeMb
 	err := r.ParseMultipartForm(h.media.MaxFileSizeMb << 20)
 	if err != nil {
@@ -69,14 +79,22 @@ func (h *Handler) Post(ctx context.Context, w http.ResponseWriter, r *http.Reque
 	return nil
 }
 
+// Get handles the retrieval of a media file by its ID.
+// @Summary Get a media file
+// @Description Retrieve a media file by its ID
+// @Tags media
+// @Produce application/json
+// @Param media_id path string true "Media ID"
+// @Success 200 {object} media.Media
+// @Failure 404 {object} v1.ErrorResponse
+// @Failure 500 {object} v1.ErrorResponse
+// @Router /media/{media_id} [get]
 func (h *Handler) Get(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-
 	params := mux.Vars(r)
 
-	mediaVal, err := h.media.QueryByID(ctx, params[MediaID])
+	mediaVal, err := h.media.QueryByID(ctx, params["media_id"])
 	if err != nil {
 		if errors.Is(err, media.ErrNotFound) {
-
 			return v1.NewRequestError(errors.New("media not found"), http.StatusNotFound)
 		}
 		return v1.NewRequestError(errors.New("error getting media: "+err.Error()), http.StatusInternalServerError)
@@ -85,11 +103,19 @@ func (h *Handler) Get(ctx context.Context, w http.ResponseWriter, r *http.Reques
 	return web.Respond(ctx, w, mediaVal, http.StatusOK)
 }
 
+// Delete handles the deletion of a media file by its ID.
+// @Summary Delete a media file
+// @Description Delete a media file by its ID
+// @Tags media
+// @Param media_id path string true "Media ID"
+// @Success 204
+// @Failure 404 {object} v1.ErrorResponse
+// @Failure 500 {object} v1.ErrorResponse
+// @Router /media/{media_id} [delete]
 func (h *Handler) Delete(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-
 	params := mux.Vars(r)
 
-	err := h.media.DeleteByID(ctx, params[MediaID])
+	err := h.media.DeleteByID(ctx, params["media_id"])
 	if err != nil {
 		if errors.Is(err, media.ErrNotFound) {
 			return v1.NewRequestError(errors.New("media not found"), http.StatusNotFound)
@@ -101,6 +127,16 @@ func (h *Handler) Delete(ctx context.Context, w http.ResponseWriter, r *http.Req
 }
 
 // GetByIDs handles the retrieval of multiple media files by their IDs.
+// @Summary Get multiple media files
+// @Description Retrieve multiple media files by their IDs
+// @Tags media
+// @Accept application/json
+// @Produce application/json
+// @Param ids body []string true "Array of Media IDs"
+// @Success 200 {array} media.Media
+// @Failure 400 {object} v1.ErrorResponse
+// @Failure 500 {object} v1.ErrorResponse
+// @Router /media [get]
 func (h *Handler) GetByIDs(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 	var mediaIDs []string
 	if err := json.NewDecoder(r.Body).Decode(&mediaIDs); err != nil {

@@ -2,6 +2,21 @@ basePath: /
 definitions:
   big.Int:
     type: object
+  github_com_St3plox_Blogchain_business_core_media.Media:
+    properties:
+      fileBytes:
+        items:
+          type: integer
+        type: array
+      id:
+        type: string
+      length:
+        type: integer
+      name:
+        type: string
+      owner_id:
+        type: string
+    type: object
   github_com_St3plox_Blogchain_business_core_post.Category:
     enum:
     - 0
@@ -53,9 +68,7 @@ definitions:
       name:
         type: string
       password:
-        items:
-          type: integer
-        type: array
+        type: string
     type: object
   github_com_St3plox_Blogchain_business_core_user.Role:
     properties:
@@ -127,6 +140,117 @@ info:
   title: Blogchain API
   version: "1.0"
 paths:
+  /media:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve multiple media files by their IDs
+      parameters:
+      - description: Array of Media IDs
+        in: body
+        name: ids
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_St3plox_Blogchain_business_core_media.Media'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse'
+      summary: Get multiple media files
+      tags:
+      - media
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload a new media file (image only)
+      parameters:
+      - description: File to upload
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/github_com_St3plox_Blogchain_business_core_media.Media'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse'
+      summary: Upload a media file
+      tags:
+      - media
+  /media/{media_id}:
+    delete:
+      description: Delete a media file by its ID
+      parameters:
+      - description: Media ID
+        in: path
+        name: media_id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse'
+      summary: Delete a media file
+      tags:
+      - media
+    get:
+      description: Retrieve a media file by its ID
+      parameters:
+      - description: Media ID
+        in: path
+        name: media_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_St3plox_Blogchain_business_core_media.Media'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse'
+      summary: Get a media file
+      tags:
+      - media
   /posts:
     get:
       description: Get all posts by a specific user address
