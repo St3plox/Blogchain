@@ -20,6 +20,7 @@ var (
 
 type Storer interface {
 	Create(ctx context.Context, media Media) (Media, error)
+	CreateMultiple(ctx context.Context, media []Media) ([]Media, error)
 	Update(ctx context.Context, media Media) (Media, error)
 	Delete(ctx context.Context, media Media) error
 	DeleteByID(ctx context.Context, mediaID string) error
@@ -65,6 +66,33 @@ func (c *Core) Create(ctx context.Context, newMedia NewMedia) (Media, error) {
 	}
 
 	return media, nil
+}
+
+func (c *Core) CreateMultiple(ctx context.Context, newMediaList []NewMedia) ([]Media, error) {
+	claims := auth.GetClaims(ctx)
+
+	user, err := c.userCore.QueryByID(ctx, claims.Subject)
+	if err != nil {
+		return nil, fmt.Errorf("media core create get user: %w", err)
+	}
+
+	var mediaList []Media
+	for _, newMedia := range newMediaList {
+		media := Media{
+			Filename:  newMedia.Filename,
+			Length:    newMedia.Length,
+			FileBytes: newMedia.FileBytes,
+			OwnerID:   user.ID,
+		}
+		mediaList = append(mediaList, media)
+	}
+
+	mediaList, err = c.storer.CreateMultiple(ctx, mediaList)
+	if err != nil {
+		return nil, fmt.Errorf("core error create: %w", err)
+	}
+
+	return mediaList, nil
 }
 
 func (c *Core) Delete(ctx context.Context, media Media) error {

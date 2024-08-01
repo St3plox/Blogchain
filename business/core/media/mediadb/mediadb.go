@@ -40,6 +40,27 @@ func (s *Store) Create(ctx context.Context, m media.Media) (media.Media, error) 
 	return m, nil
 }
 
+
+func (s *Store) CreateMultiple(ctx context.Context, mediaList []media.Media) ([]media.Media, error) {
+	var docs []interface{}
+	for _, m := range mediaList {
+		docs = append(docs, m)
+	}
+
+	result, err := s.collection.InsertMany(ctx, docs)
+	if err != nil {
+		return nil, fmt.Errorf("create multiple: %w", err)
+	}
+
+	for i, id := range result.InsertedIDs {
+		mediaList[i].ID = id.(primitive.ObjectID)
+	}
+
+	return mediaList, nil
+}
+
+
+
 func (s *Store) Update(ctx context.Context, m media.Media) (media.Media, error) {
 	filter := bson.M{"_id": m.ID}
 	update := bson.M{"$set": m}

@@ -86,7 +86,7 @@ const docTemplate = `{
                 "tags": [
                     "media"
                 ],
-                "summary": "Upload a media file",
+                "summary": "Upload multiple media file",
                 "parameters": [
                     {
                         "type": "file",
@@ -100,7 +100,10 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/github_com_St3plox_Blogchain_business_core_media.Media"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_St3plox_Blogchain_business_core_media.Media"
+                            }
                         }
                     },
                     "400": {
@@ -603,6 +606,18 @@ const docTemplate = `{
                 "content": {
                     "type": "string"
                 },
+                "media_names": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "media_urls": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "tags": {
                     "type": "array",
                     "items": {
@@ -631,6 +646,13 @@ const docTemplate = `{
                 },
                 "id": {
                     "$ref": "#/definitions/big.Int"
+                },
+                "media": {
+                    "description": "[name]url",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 },
                 "tags": {
                     "type": "array",

@@ -9,7 +9,6 @@ import (
 	"github.com/St3plox/Blogchain/business/core/media"
 	v1 "github.com/St3plox/Blogchain/business/web/v1"
 	"github.com/St3plox/Blogchain/foundation/web"
-	"github.com/gabriel-vasile/mimetype"
 	"github.com/gorilla/mux"
 )
 
@@ -35,34 +34,10 @@ func New(media *media.Core) *Handler {
 // @Failure 500 {object} v1.ErrorResponse
 // @Router /media [post]
 func (h *Handler) Post(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-	// Parse the multipart form, allowing for a maximum upload MaxFileSizeMb
-	err := r.ParseMultipartForm(h.media.MaxFileSizeMb << 20)
+
+	newMedia, err := h.media.ParseMedia(r)
 	if err != nil {
-		return v1.NewRequestError(errors.New("failed to parse multipart form: "+err.Error()), http.StatusBadRequest)
-	}
-
-	file, handler, err := r.FormFile("file")
-	if err != nil {
-		return v1.NewRequestError(errors.New("read file error: "+err.Error()), http.StatusBadRequest)
-	}
-	defer file.Close()
-
-	buf := make([]byte, handler.Size)
-	_, err = file.Read(buf)
-	if err != nil {
-		return v1.NewRequestError(errors.New("error reading file: "+err.Error()), http.StatusInternalServerError)
-	}
-
-	// Check if the file is an image
-	mime := mimetype.Detect(buf)
-	if !mime.Is("image/jpeg") && !mime.Is("image/png") && !mime.Is("image/gif") && !mime.Is("image/bmp") {
-		return v1.NewRequestError(errors.New("file is not a valid image type"), http.StatusBadRequest)
-	}
-
-	newMedia := media.NewMedia{
-		Filename:  handler.Filename,
-		Length:    handler.Size,
-		FileBytes: buf,
+		return err
 	}
 
 	media, err := h.media.Create(ctx, newMedia)
@@ -73,6 +48,37 @@ func (h *Handler) Post(ctx context.Context, w http.ResponseWriter, r *http.Reque
 	err = web.Respond(ctx, w, media, http.StatusCreated)
 	if err != nil {
 		h.media.Delete(ctx, media)
+		return err
+	}
+
+	return nil
+}
+
+// Post handles the uploading of multiple new media files.
+// @Summary Upload multiple media file
+// @Description Upload a new media file (image only)
+// @Tags media
+// @Accept multipart/form-data
+// @Produce application/json
+// @Param file formData file true "File to upload"
+// @Success 201 {object} []media.Media
+// @Failure 400 {object} v1.ErrorResponse
+// @Failure 500 {object} v1.ErrorResponse
+// @Router /media [post]
+func (h *Handler) PostMultiple(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+
+	newMedia, err := h.media.ParseMultipleMedia(r)
+	if err != nil {
+		return err
+	}
+
+	media, err := h.media.CreateMultiple(ctx, newMedia)
+	if err != nil {
+		return v1.NewRequestError(errors.New("error posting media: "+err.Error()), http.StatusInternalServerError)
+	}
+
+	err = web.Respond(ctx, w, media, http.StatusCreated)
+	if err != nil {
 		return err
 	}
 
@@ -92,7 +98,7 @@ func (h *Handler) Post(ctx context.Context, w http.ResponseWriter, r *http.Reque
 func (h *Handler) Get(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 	params := mux.Vars(r)
 
-	mediaVal, err := h.media.QueryByID(ctx, params["media_id"])
+	mediaVal, err := h.media.QueryByID(ctx, params[MediaID])
 	if err != nil {
 		if errors.Is(err, media.ErrNotFound) {
 			return v1.NewRequestError(errors.New("media not found"), http.StatusNotFound)
@@ -115,7 +121,7 @@ func (h *Handler) Get(ctx context.Context, w http.ResponseWriter, r *http.Reques
 func (h *Handler) Delete(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 	params := mux.Vars(r)
 
-	err := h.media.DeleteByID(ctx, params["media_id"])
+	err := h.media.DeleteByID(ctx, params[MediaID])
 	if err != nil {
 		if errors.Is(err, media.ErrNotFound) {
 			return v1.NewRequestError(errors.New("media not found"), http.StatusNotFound)

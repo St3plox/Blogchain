@@ -36,3 +36,16 @@ func (p Media) CacheExpiration() time.Duration {
 func IdToCacheKey(idHex string) string {
 	return "media:" + idHex
 }
+
+// GenerateMediaLists creates lists of media names and URLs from a slice of Media
+func GenerateMediaLists(mediaList []Media) ([]string, []string) {
+	var mediaNames []string
+	var mediaUrls []string
+
+	for _, media := range mediaList {
+		mediaNames = append(mediaNames, media.Filename)
+		mediaUrls = append(mediaUrls, media.GenUrl())
+	}
+
+	return mediaNames, mediaUrls
+}

@@ -33,6 +33,14 @@ definitions:
         $ref: '#/definitions/github_com_St3plox_Blogchain_business_core_post.Category'
       content:
         type: string
+      media_names:
+        items:
+          type: string
+        type: array
+      media_urls:
+        items:
+          type: string
+        type: array
       tags:
         items:
           type: string
@@ -52,6 +60,11 @@ definitions:
         type: string
       id:
         $ref: '#/definitions/big.Int'
+      media:
+        additionalProperties:
+          type: string
+        description: '[name]url'
+        type: object
       tags:
         items:
           type: string
@@ -190,7 +203,9 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/github_com_St3plox_Blogchain_business_core_media.Media'
+            items:
+              $ref: '#/definitions/github_com_St3plox_Blogchain_business_core_media.Media'
+            type: array
         "400":
           description: Bad Request
           schema:
@@ -199,7 +214,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse'
-      summary: Upload a media file
+      summary: Upload multiple media file
       tags:
       - media
   /media/{media_id}:

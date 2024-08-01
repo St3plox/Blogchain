@@ -16,6 +16,8 @@ contract PostStorage {
         string[] tags;
         uint256 timestamp;
         Category category;
+        string[] media_names;
+        string[] media_urls;
     }
 
     mapping(address => Post[]) public userPosts;
@@ -36,8 +38,12 @@ contract PostStorage {
         string memory _content,
         Category _category,
         string[] memory _tags,
-        address author
+        address author,
+        string[] memory _media_names,
+        string[] memory _media_urls
     ) public {
+        require(_media_names.length == _media_urls.length, "Media names and URLs array length mismatch");
+
         if (userPosts[author].length == 0) {
             users.push(author);
         }
@@ -52,7 +58,9 @@ contract PostStorage {
             title: _title,
             timestamp: block.timestamp,
             tags: _tags,
-            category: _category
+            category: _category,
+            media_names: _media_names,
+            media_urls: _media_urls
         });
 
         userPosts[author].push(newPost);
