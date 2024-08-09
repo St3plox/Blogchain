@@ -20,6 +20,11 @@ type NewMedia struct {
 	FileBytes []byte `json:"fileBytes"`
 }
 
+type MediaData struct {
+	Filename string `json:"name"`
+	Url      string `json:"url"`
+}
+
 // GenUrl generates part of url for downloading the mediafile
 func (m Media) GenUrl() string {
 	return "/media/" + m.ID.Hex()
@@ -48,4 +53,21 @@ func GenerateMediaLists(mediaList []Media) ([]string, []string) {
 	}
 
 	return mediaNames, mediaUrls
+}
+
+func MapTo(media Media) MediaData {
+	return MediaData{
+		Filename: media.Filename,
+		Url:      media.GenUrl(),
+	}
+}
+
+func MapToMultiple(media []Media) []MediaData {
+
+	mediaData := make([]MediaData, 1)
+	for _, m := range media {
+		mediaData = append(mediaData, MapTo(m))
+	}
+
+	return mediaData
 }

@@ -29,7 +29,7 @@ func New(media *media.Core) *Handler {
 // @Accept multipart/form-data
 // @Produce application/json
 // @Param file formData file true "File to upload"
-// @Success 201 {object} media.Media
+// @Success 201 {object} media.MediaData
 // @Failure 400 {object} v1.ErrorResponse
 // @Failure 500 {object} v1.ErrorResponse
 // @Router /media [post]
@@ -47,7 +47,6 @@ func (h *Handler) Post(ctx context.Context, w http.ResponseWriter, r *http.Reque
 
 	err = web.Respond(ctx, w, media, http.StatusCreated)
 	if err != nil {
-		h.media.Delete(ctx, media)
 		return err
 	}
 
@@ -61,10 +60,10 @@ func (h *Handler) Post(ctx context.Context, w http.ResponseWriter, r *http.Reque
 // @Accept multipart/form-data
 // @Produce application/json
 // @Param file formData file true "File to upload"
-// @Success 201 {object} []media.Media
+// @Success 201 {object} []media.MediaData	
 // @Failure 400 {object} v1.ErrorResponse
 // @Failure 500 {object} v1.ErrorResponse
-// @Router /media [post]
+// @Router /media/many [post]
 func (h *Handler) PostMultiple(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 
 	newMedia, err := h.media.ParseMultipleMedia(r)

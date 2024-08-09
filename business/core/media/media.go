@@ -45,12 +45,12 @@ func NewCore(storer Storer, cacheStorer cachestore.CacheStorer, userCore *user.C
 	}
 }
 
-func (c *Core) Create(ctx context.Context, newMedia NewMedia) (Media, error) {
+func (c *Core) Create(ctx context.Context, newMedia NewMedia) (MediaData, error) {
 	claims := auth.GetClaims(ctx)
 
 	user, err := c.userCore.QueryByID(ctx, claims.Subject)
 	if err != nil {
-		return Media{}, fmt.Errorf("media core create get user: %w", err)
+		return MediaData{}, fmt.Errorf("media core create get user: %w", err)
 	}
 
 	media := Media{
@@ -62,13 +62,13 @@ func (c *Core) Create(ctx context.Context, newMedia NewMedia) (Media, error) {
 
 	media, err = c.storer.Create(ctx, media)
 	if err != nil {
-		return Media{}, fmt.Errorf("core error create: %w", err)
+		return MediaData{}, fmt.Errorf("core error create: %w", err)
 	}
 
-	return media, nil
+	return MapTo(media), nil
 }
 
-func (c *Core) CreateMultiple(ctx context.Context, newMediaList []NewMedia) ([]Media, error) {
+func (c *Core) CreateMultiple(ctx context.Context, newMediaList []NewMedia) ([]MediaData, error) {
 	claims := auth.GetClaims(ctx)
 
 	user, err := c.userCore.QueryByID(ctx, claims.Subject)
@@ -92,7 +92,7 @@ func (c *Core) CreateMultiple(ctx context.Context, newMediaList []NewMedia) ([]M
 		return nil, fmt.Errorf("core error create: %w", err)
 	}
 
-	return mediaList, nil
+	return MapToMultiple(mediaList), nil
 }
 
 func (c *Core) Delete(ctx context.Context, media Media) error {
