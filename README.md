@@ -1,4 +1,4 @@
-
+#### readme top
 
 <!-- PROJECT LOGO -->
 <br />
@@ -15,6 +15,7 @@
     <a href="https://github.com/St3plox/Blogchain/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
     ·
     <a href="https://github.com/St3plox/Blogchain/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
+    .
     <a href="https://pkg.go.dev/github.com/St3plox/Blogchain">Documentation</a>
   </p>
 </div>
@@ -51,14 +52,17 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-This project was created mostly for learning purposes. The app itself represents a frontend and backend api that uses document database and ethereum testnet. 
-When user creates an account the ethereum address will be generated and asociated with their account. All user data are stored in the db. However, posts
-are stored in ethereum blockchain. There is also an admin account that signs all the transactions and pays the gas fees. Backend api uses jwt to authenticate users. 
+This project was created mostly for learning purposes. The app itself represents a frontend and backend api that uses  mongodb and ethereum testnet for data storage. 
+When user creates an account the ethereum address will be generated and asociated with their account. All user data are stored in the db. However, posts are stored in ethereum blockchain. 
+There is also an admin account that signs all the transactions and pays the gas fees.
+(In future I need to change it because it's unsafe, made it bacause it's simple as a prototype) Backend api uses jwt to authenticate users.
+
+In the backend api I haven't used any frameworks, but I used gorilla/mux as a router and some kind of template for an app
+from the Ardanlabs course.
 
 You can access api docs on http://localhost:4000/swagger/index.html
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 
 
 ### Built With
@@ -80,7 +84,7 @@ You can access api docs on http://localhost:4000/swagger/index.html
 <!-- GETTING STARTED -->
 ## Getting Started
 The simplest way to get started is to use docker. Otherwise you will have to install Go 1.22, npm, hardhat, mongod, redis. Startup the mongodb server, than hardhat tesnet, 
-than frontend and backend api
+redis server, frontend and backend api.
 
 ### Prerequisites
 *docker
@@ -114,8 +118,8 @@ Frontend can be accessed on port 8080, backend - 3000
 
 - [X] Caching
 - [X] Documentation
-- [ ] Media support
-- [ ] Adequate testing
+- [X] Media support (backend)
+- [ ] Testing
 - [ ] CI/CD (or smth like this)
 - [ ] Recomendation engine
 - [ ] Improved UI/UX (no way)
