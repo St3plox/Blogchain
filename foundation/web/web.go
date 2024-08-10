@@ -8,7 +8,6 @@ import (
 	"syscall"
 	"time"
 
-	v1 "github.com/St3plox/Blogchain/business/web/v1"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 )
@@ -61,15 +60,7 @@ func (a *App) Handle(path string, method string, handler Handler, mw ...Middlewa
 
 		err := h(r.Context(), w, r)
 		if err != nil {
-
-			var reqErr *v1.RequestError
-			if errors.As(err, &reqErr) {
-
-				http.Error(w, reqErr.Err.Error(), reqErr.Status)
-				return
-			}
-
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
 		}
 	}).Methods(method)
 }
