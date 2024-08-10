@@ -86,6 +86,50 @@ const docTemplate = `{
                 "tags": [
                     "media"
                 ],
+                "summary": "Upload a media file",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "File to upload",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_St3plox_Blogchain_business_core_media.MediaData"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/media/many": {
+            "post": {
+                "description": "Upload a new media file (image only)",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "media"
+                ],
                 "summary": "Upload multiple media file",
                 "parameters": [
                     {
@@ -102,7 +146,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_St3plox_Blogchain_business_core_media.Media"
+                                "$ref": "#/definitions/github_com_St3plox_Blogchain_business_core_media.MediaData"
                             }
                         }
                     },
@@ -580,6 +624,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "owner_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_St3plox_Blogchain_business_core_media.MediaData": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "url": {
                     "type": "string"
                 }
             }

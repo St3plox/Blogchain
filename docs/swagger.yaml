@@ -17,6 +17,13 @@ definitions:
       owner_id:
         type: string
     type: object
+  github_com_St3plox_Blogchain_business_core_media.MediaData:
+    properties:
+      name:
+        type: string
+      url:
+        type: string
+    type: object
   github_com_St3plox_Blogchain_business_core_post.Category:
     enum:
     - 0
@@ -203,9 +210,7 @@ paths:
         "201":
           description: Created
           schema:
-            items:
-              $ref: '#/definitions/github_com_St3plox_Blogchain_business_core_media.Media'
-            type: array
+            $ref: '#/definitions/github_com_St3plox_Blogchain_business_core_media.MediaData'
         "400":
           description: Bad Request
           schema:
@@ -214,7 +219,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse'
-      summary: Upload multiple media file
+      summary: Upload a media file
       tags:
       - media
   /media/{media_id}:
@@ -264,6 +269,37 @@ paths:
           schema:
             $ref: '#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse'
       summary: Get a media file
+      tags:
+      - media
+  /media/many:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload a new media file (image only)
+      parameters:
+      - description: File to upload
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            items:
+              $ref: '#/definitions/github_com_St3plox_Blogchain_business_core_media.MediaData'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse'
+      summary: Upload multiple media file
       tags:
       - media
   /posts:
