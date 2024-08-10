@@ -48,7 +48,7 @@ func (c *Core) Create(ctx context.Context, np NewPost, userAddressHex string) (P
 	if err != nil {
 		return Post{}, err
 	}
-	tx, err := c.postContract.Contract.Post(auth, np.Title, np.Content, uint8(np.Category), np.Tags, address)
+	tx, err := c.postContract.Contract.Post(auth, np.Title, np.Content, uint8(np.Category), np.Tags, address, np.MediaNames, np.MediaUrls)
 	if err != nil {
 		return Post{}, fmt.Errorf("error making post: %e", err)
 	}

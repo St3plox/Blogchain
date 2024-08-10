@@ -7,11 +7,14 @@ import (
 	"net/http"
 	"os"
 	"runtime"
+	"strconv"
 	"time"
 
 	defaultLog "log"
 
 	"github.com/St3plox/Blogchain/app/backend/user-service/handlers"
+	"github.com/St3plox/Blogchain/business/core/media"
+	"github.com/St3plox/Blogchain/business/core/media/mediadb"
 	"github.com/St3plox/Blogchain/business/core/post"
 	"github.com/St3plox/Blogchain/business/core/user"
 	"github.com/St3plox/Blogchain/business/core/user/userdb"
@@ -99,6 +102,9 @@ func run(log *zerolog.Logger) error {
 		}
 		Redis struct {
 			Url string `conf:"default:redis://@localhost:6379"`
+		}
+		Media struct {
+			MaxFileSizeMb string `conf:"default:10"`
 		}
 		ETH struct {
 			Rawurl   string `conf:"default:http://127.0.0.1:8545"`
@@ -222,6 +228,18 @@ func run(log *zerolog.Logger) error {
 	postCore := post.NewCore(postContract, admin, redisClient)
 
 	// -------------------------------------------------------------------------
+	//media support
+
+	maxSize, err := strconv.ParseInt(cfg.Media.MaxFileSizeMb, 10, 64)
+	if err != nil {
+		return err
+	}
+
+	mediaDb := mediadb.NewStore(log, client)
+	mediaCore := media.NewCore(mediaDb, redisClient, userCore)
+	mediaCore.MaxFileSizeMb = maxSize
+
+	// -------------------------------------------------------------------------
 	// Initialize authentication support
 
 	log.Info().Str("status", "startup").Msg("initializing V1 API AUTH support")
@@ -271,11 +289,12 @@ func run(log *zerolog.Logger) error {
 	log.Info().Msg("initializing V1 API support")
 	shutdown := make(chan os.Signal, 1)
 	apiMux := handlers.APIMux(handlers.APIMuxConfig{
-		Shutdown: shutdown,
-		Log:      log,
-		Auth:     auth,
-		UserCore: userCore,
-		PostCore: postCore,
+		Shutdown:  shutdown,
+		Log:       log,
+		Auth:      auth,
+		UserCore:  userCore,
+		PostCore:  postCore,
+		MediaCore: mediaCore,
 	})
 
 	apiMux.Handle("/swagger", "GET", swaggerHandler())

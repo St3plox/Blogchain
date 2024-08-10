@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/St3plox/Blogchain/business/core/media"
 	"github.com/St3plox/Blogchain/business/core/post"
 	"github.com/St3plox/Blogchain/business/core/user"
 	"github.com/St3plox/Blogchain/business/web/auth"
@@ -17,16 +18,18 @@ import (
 )
 
 type Handler struct {
-	post *post.Core
-	auth *auth.Auth
-	user *user.Core
+	post  *post.Core
+	auth  *auth.Auth
+	user  *user.Core
+	media *media.Core
 }
 
-func New(postCore *post.Core, auth *auth.Auth, userCore *user.Core) *Handler {
+func New(postCore *post.Core, auth *auth.Auth, userCore *user.Core, mediaCore *media.Core) *Handler {
 	return &Handler{
-		post: postCore,
-		auth: auth,
-		user: userCore,
+		post:  postCore,
+		auth:  auth,
+		user:  userCore,
+		media: mediaCore,
 	}
 }
 
@@ -40,6 +43,7 @@ func New(postCore *post.Core, auth *auth.Auth, userCore *user.Core) *Handler {
 // @Failure 400 {object} v1.ErrorResponse
 // @Router /posts [post]
 func (h *Handler) Post(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+
 	var np post.NewPost
 	err := json.NewDecoder(r.Body).Decode(&np)
 	if err != nil {
@@ -47,11 +51,11 @@ func (h *Handler) Post(ctx context.Context, w http.ResponseWriter, r *http.Reque
 	}
 	claims := auth.GetClaims(ctx)
 
+	//TODO: move to postCore
 	usr, err := h.user.QueryByID(ctx, claims.Subject)
 	if err != nil {
 		return v1.NewRequestError(errors.New("user error "+err.Error()), http.StatusNotFound)
 	}
-
 	post, err := h.post.Create(ctx, np, usr.AddressHex)
 	if err != nil {
 		return v1.NewRequestError(errors.New("create error "+err.Error()), http.StatusInternalServerError)

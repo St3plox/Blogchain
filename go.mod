@@ -63,7 +63,7 @@ require (
 	github.com/ferranbt/fastssz v0.1.3 // indirect
 	github.com/fjl/memsize v0.0.2 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
-	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
+	github.com/gabriel-vasile/mimetype v1.4.5 // indirect
 	github.com/gballet/go-libpcsclite v0.0.0-20191108122812-4678299bea08 // indirect
 	github.com/getsentry/sentry-go v0.28.1 // indirect
 	github.com/go-ini/ini v1.67.0 // indirect

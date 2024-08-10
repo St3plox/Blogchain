@@ -18,20 +18,23 @@ const (
 )
 
 type Post struct {
-	ID        *big.Int       `json:"id"`
-	Author    common.Address `json:"author"`
-	Title     string         `json:"title"`
-	Content   string         `json:"content"`
-	Timestamp *big.Int       `json:"timestamp"`
-	Category  Category       `json:"category"`
-	Tags      []string       `json:"tags"`
+	ID        *big.Int          `json:"id"`
+	Author    common.Address    `json:"author"`
+	Title     string            `json:"title"`
+	Content   string            `json:"content"`
+	Timestamp *big.Int          `json:"timestamp"`
+	Category  Category          `json:"category"`
+	Tags      []string          `json:"tags"`
+	Media     map[string]string `json:"media"` //[name]url
 }
 
 type NewPost struct {
-	Title    string   `json:"title"`
-	Content  string   `json:"content"`
-	Category Category `json:"category"`
-	Tags     []string `json:"tags"`
+	Title      string   `json:"title"`
+	Content    string   `json:"content"`
+	Category   Category `json:"category"`
+	Tags       []string `json:"tags"`
+	MediaNames []string `json:"media_names"`
+	MediaUrls  []string `json:"media_urls"`
 }
 
 func (p *Post) CacheKey() string {
@@ -43,7 +46,7 @@ func (p *Post) CacheExpiration() time.Duration {
 }
 
 func IdToCacheKey(id string) string {
-	return "post:" + id;
+	return "post:" + id
 }
 
 func (p Post) IsEmpty() bool {
@@ -51,7 +54,13 @@ func (p Post) IsEmpty() bool {
 }
 
 func mapTo(postStoragePost contract.PostStoragePost) Post {
-	return  Post{
+
+	mediaUrls := make(map[string]string)
+	for i, name := range postStoragePost.MediaNames {
+		mediaUrls[name] = postStoragePost.MediaUrls[i]
+	}
+
+	return Post{
 		ID:        postStoragePost.Id,
 		Author:    postStoragePost.Author,
 		Title:     postStoragePost.Title,
@@ -59,5 +68,6 @@ func mapTo(postStoragePost contract.PostStoragePost) Post {
 		Timestamp: postStoragePost.Timestamp,
 		Tags:      postStoragePost.Tags,
 		Category:  Category(postStoragePost.Category),
+		Media:     mediaUrls,
 	}
 }

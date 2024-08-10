@@ -66,7 +66,7 @@ func (c *Core) Create(ctx context.Context, nu NewUser) (User, error) {
 		return User{}, fmt.Errorf("create : %w", err)
 	}
 
-	passwordHash, err := bcrypt.GenerateFromPassword(nu.Password, 4)
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(nu.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return User{}, fmt.Errorf("create : %w", err)
 	}
@@ -161,8 +161,6 @@ func (c *Core) QueryByEmail(ctx context.Context, email mail.Address) (User, erro
 	if err != nil {
 		return User{}, fmt.Errorf("query: email[%s]: %w", email, err)
 	}
-
-	
 
 	return user, nil
 }

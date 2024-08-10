@@ -24,6 +24,221 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/media": {
+            "get": {
+                "description": "Retrieve multiple media files by their IDs",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "media"
+                ],
+                "summary": "Get multiple media files",
+                "parameters": [
+                    {
+                        "description": "Array of Media IDs",
+                        "name": "ids",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_St3plox_Blogchain_business_core_media.Media"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Upload a new media file (image only)",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "media"
+                ],
+                "summary": "Upload a media file",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "File to upload",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_St3plox_Blogchain_business_core_media.MediaData"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/media/many": {
+            "post": {
+                "description": "Upload a new media file (image only)",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "media"
+                ],
+                "summary": "Upload multiple media file",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "File to upload",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_St3plox_Blogchain_business_core_media.MediaData"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/media/{media_id}": {
+            "get": {
+                "description": "Retrieve a media file by its ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "media"
+                ],
+                "summary": "Get a media file",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Media ID",
+                        "name": "media_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_St3plox_Blogchain_business_core_media.Media"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a media file by its ID",
+                "tags": [
+                    "media"
+                ],
+                "summary": "Delete a media file",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Media ID",
+                        "name": "media_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/posts": {
             "get": {
                 "description": "Get all posts by a specific user address",
@@ -390,6 +605,40 @@ const docTemplate = `{
         "big.Int": {
             "type": "object"
         },
+        "github_com_St3plox_Blogchain_business_core_media.Media": {
+            "type": "object",
+            "properties": {
+                "fileBytes": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "length": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "owner_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_St3plox_Blogchain_business_core_media.MediaData": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
         "github_com_St3plox_Blogchain_business_core_post.Category": {
             "type": "integer",
             "enum": [
@@ -411,6 +660,18 @@ const docTemplate = `{
                 },
                 "content": {
                     "type": "string"
+                },
+                "media_names": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "media_urls": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "tags": {
                     "type": "array",
@@ -441,6 +702,13 @@ const docTemplate = `{
                 "id": {
                     "$ref": "#/definitions/big.Int"
                 },
+                "media": {
+                    "description": "[name]url",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
                 "tags": {
                     "type": "array",
                     "items": {
@@ -465,10 +733,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "password": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
+                    "type": "string"
                 }
             }
         },

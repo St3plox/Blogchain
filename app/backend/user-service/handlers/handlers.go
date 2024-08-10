@@ -3,24 +3,25 @@ package handlers
 import (
 	"os"
 
-	"github.com/St3plox/Blogchain/app/backend/user-service/handlers/postgrp"
-	"github.com/St3plox/Blogchain/app/backend/user-service/handlers/usergrp"
+	"github.com/St3plox/Blogchain/app/backend/user-service/handlers/v1/mediagrp"
+	"github.com/St3plox/Blogchain/app/backend/user-service/handlers/v1/postgrp"
+	"github.com/St3plox/Blogchain/app/backend/user-service/handlers/v1/usergrp"
+	"github.com/St3plox/Blogchain/business/core/media"
 	"github.com/St3plox/Blogchain/business/core/post"
 	"github.com/St3plox/Blogchain/business/core/user"
 	"github.com/St3plox/Blogchain/business/web/auth"
 	"github.com/St3plox/Blogchain/business/web/v1/mid"
 	"github.com/St3plox/Blogchain/foundation/web"
 	"github.com/rs/zerolog"
-
-
 )
 
 type APIMuxConfig struct {
-	Shutdown chan os.Signal
-	Log      *zerolog.Logger
-	Auth     *auth.Auth
-	UserCore *user.Core
-	PostCore *post.Core
+	Shutdown  chan os.Signal
+	Log       *zerolog.Logger
+	Auth      *auth.Auth
+	UserCore  *user.Core
+	PostCore  *post.Core
+	MediaCore *media.Core
 }
 
 func APIMux(cfg APIMuxConfig) *web.App {
@@ -28,29 +29,36 @@ func APIMux(cfg APIMuxConfig) *web.App {
 
 	uh := usergrp.New(cfg.UserCore, cfg.Auth)
 
-	app.Handle("/users/register", "POST", uh.RegisterUser)
-	app.Handle("/users/login", "POST", uh.LoginUser)
+	//=================================================================================
+	//User exnpoints
 
-	ph := postgrp.New(cfg.PostCore, cfg.Auth, cfg.UserCore)
+	app.Handle(usergrp.RegisterUserPath, "POST", uh.RegisterUser)
+	app.Handle(usergrp.LoginUserPath, "POST", uh.LoginUser)
 
-	app.Handle("/posts", "POST", ph.Post, mid.Authenticate(cfg.Auth), mid.Authorize(cfg.Auth, auth.RuleAny))
+	//=================================================================================
+	//Post endpoints
 
-	app.Handle("/posts", "GET", ph.GetUserPosts, mid.Authenticate(cfg.Auth), mid.Authorize(cfg.Auth, auth.RuleAny))
+	ph := postgrp.New(cfg.PostCore, cfg.Auth, cfg.UserCore, cfg.MediaCore)
 
-	app.Handle("/posts/all", "GET", ph.GetAll)
-	app.Handle("/posts/{address}", "GET", ph.GetPostsByUserAddress)
-	app.Handle("/posts/id/{id}", "GET", ph.GetById)
-	app.Handle("/posts/{address}/{index}", "GET", ph.GetPostsByUserAddressAndIndex)
+	app.Handle(postgrp.PostPath, "POST", ph.Post, mid.Authenticate(cfg.Auth), mid.Authorize(cfg.Auth, auth.RuleAny))
 
-	// app.Handle("/swagger/*any", "GET",  swaggerHandler())
+	app.Handle(postgrp.GetUserPostsPath, "GET", ph.GetUserPosts, mid.Authenticate(cfg.Auth), mid.Authorize(cfg.Auth, auth.RuleAny))
+
+	app.Handle(postgrp.GetAllPath, "GET", ph.GetAll)
+	app.Handle(postgrp.GetPostsByUserAddressPath, "GET", ph.GetPostsByUserAddress)
+	app.Handle(postgrp.GetByIdPath, "GET", ph.GetById)
+	app.Handle(postgrp.GetPostsByUserAddressAndIndexPath, "GET", ph.GetPostsByUserAddressAndIndex)
+
+	//=================================================================================
+	//Media endpoints
+
+	mc := mediagrp.New(cfg.MediaCore)
+
+	app.Handle(mediagrp.GetPath, "GET", mc.Get)
+	app.Handle(mediagrp.GetByIDsPath, "GET", mc.GetByIDs)
+	app.Handle(mediagrp.PostPath, "POST", mc.Post, mid.Authenticate(cfg.Auth), mid.Authorize(cfg.Auth, auth.RuleAny))
+	app.Handle(mediagrp.PostMultiple, "POST", mc.PostMultiple, mid.Authenticate(cfg.Auth), mid.Authorize(cfg.Auth, auth.RuleAny))
+	app.Handle(mediagrp.DeletePath, "DELETE", mc.Delete, mid.Authenticate(cfg.Auth), mid.Authorize(cfg.Auth, auth.RuleAny))
 
 	return app
 }
-
-// func swaggerHandler() web.Handler {
-//     swaggerHandler := httpSwagger.WrapHandler
-//     return func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-//         swaggerHandler(w, r)
-//         return nil
-//     }
-// }
