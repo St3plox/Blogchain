@@ -18,7 +18,7 @@ func NewClient(rawurl string) (*Client, error) {
 
 	client, err := ethclient.Dial(rawurl)
 	if err != nil {
-		return nil, fmt.Errorf("error setablishing connection: %e", err)
+		return nil, fmt.Errorf("error establishing connection: %e", err)
 	}
 
 	return &Client{netUrl: rawurl, Client: client}, nil

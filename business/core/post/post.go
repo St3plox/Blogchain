@@ -16,10 +16,10 @@ import (
 type Core struct {
 	postContract *contract.PostContract
 	admin        *auth.Admin
-	cacheStorer  cachestore.CacheStorer
+	cacheStorer  cachestore.CacheStore
 }
 
-func NewCore(postContract *contract.PostContract, admin *auth.Admin, cacheStorer cachestore.CacheStorer) *Core {
+func NewCore(postContract *contract.PostContract, admin *auth.Admin, cacheStorer cachestore.CacheStore) *Core {
 	return &Core{
 		postContract: postContract,
 		admin:        admin,

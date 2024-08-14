@@ -37,11 +37,11 @@ type Storer interface {
 type Core struct {
 	storer      Storer
 	ethClient   *blockchain.Client
-	cacheStorer cachestore.CacheStorer
+	cacheStorer cachestore.CacheStore
 }
 
 // NewCore constructs a core for user api access.
-func NewCore(storer Storer, ethClient *blockchain.Client, cacheStorer cachestore.CacheStorer) (*Core, error) {
+func NewCore(storer Storer, ethClient *blockchain.Client, cacheStorer cachestore.CacheStore) (*Core, error) {
 
 	return &Core{
 		storer:      storer,

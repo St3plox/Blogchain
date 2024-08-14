@@ -46,7 +46,7 @@ func (c *Client) CreateEthAccount() (AccountData, error) {
 		return AccountData{}, err
 	}
 	if !available {
-		return AccountData{}, errors.New("Generated address is unavaiable")
+		return AccountData{}, errors.New("Generated address is unavailable")
 	}
 
 	return AccountData{

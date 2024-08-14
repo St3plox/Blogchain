@@ -31,13 +31,13 @@ type Storer interface {
 // Core manages the set of APIs for media access.
 type Core struct {
 	storer      Storer
-	cacheStorer cachestore.CacheStorer
+	cacheStorer cachestore.CacheStore
 	userCore    *user.Core
 
 	MaxFileSizeMb int64
 }
 
-func NewCore(storer Storer, cacheStorer cachestore.CacheStorer, userCore *user.Core) *Core {
+func NewCore(storer Storer, cacheStorer cachestore.CacheStore, userCore *user.Core) *Core {
 	return &Core{
 		storer:      storer,
 		cacheStorer: cacheStorer,

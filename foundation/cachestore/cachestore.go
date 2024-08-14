@@ -6,9 +6,9 @@
 //
 // - **Cacheable Interface**: An interface that should be implemented by all entities that are intended to be cached. It provides methods for getting the cache key and expiration duration.
 //
-// - **CacheStorer Interface**: An interface for cache storage operations. It includes methods for setting, getting, and deleting cacheable entities.
+// - **CacheStore Interface**: An interface for cache storage operations. It includes methods for setting, getting, and deleting cacheable entities.
 //
-// - **RedisClient**: A concrete implementation of the CacheStorer interface using Redis. It provides methods to interact with Redis to store, retrieve, and delete cacheable entities.
+// - **RedisClient**: A concrete implementation of the CacheStore interface using Redis. It provides methods to interact with Redis to store, retrieve, and delete cacheable entities.
 package cachestore
 
 import (
@@ -26,14 +26,14 @@ type Cacheable interface {
 	CacheExpiration() time.Duration
 }
 
-// CacheStorer is the interface for cache storage.
-type CacheStorer interface {
+// CacheStore is the interface for cache storage.
+type CacheStore interface {
 	Set(ctx context.Context, value Cacheable) error
 	Get(ctx context.Context, key string, target Cacheable) error
 	Delete(ctx context.Context, key string) error
 }
 
-// RedisClient is a Redis implementation of CacheStorer.
+// RedisClient is a Redis implementation of CacheStore.
 type RedisClient struct {
 	Client *redis.Client
 }
