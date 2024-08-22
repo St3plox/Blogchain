@@ -22,7 +22,7 @@ type AccountData struct {
 
 // CreateEthAccount generates a new Ethereum account with a private key, public key, and address.
 // It also checks if the generated address is available (i.e., not used for contracts or transactions).
-func (c *Client) CreateEthAccount() (AccountData, error) {
+func (c *EthClient) CreateEthAccount() (AccountData, error) {
 
 	// Generate a new private key
 	privateKey, err := crypto.GenerateKey()
@@ -57,7 +57,7 @@ func (c *Client) CreateEthAccount() (AccountData, error) {
 }
 
 // isAvailable checks if an Ethereum address is "available" (no contract code, no transaction history)
-func (c *Client) isAvailable(addressHex string) (bool, error) {
+func (c *EthClient) isAvailable(addressHex string) (bool, error) {
 
 	address := common.HexToAddress(addressHex)
 

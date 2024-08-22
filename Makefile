@@ -105,3 +105,9 @@ test-foundation:
 
 test-cachestore:
 	go test ./foundation/cachestore
+
+test-userdb:
+	 go test  ./business/core/user/userdb
+
+test-user:
+	go test ./business/core/user

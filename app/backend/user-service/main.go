@@ -182,7 +182,7 @@ func run(log *zerolog.Logger) error {
 	redisClient := cachestore.NewRedisClient(redis.NewClient(opt))
 
 	// -------------------------------------------------------------------------
-	//ETH client supoport
+	//ETH client support
 
 	ethRawUrl := os.Getenv("HARDHAT_NODE_URL")
 	if ethRawUrl == "" {

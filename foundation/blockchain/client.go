@@ -6,20 +6,24 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
-// Client provides methods to interact with an Ethereum blockchain network.
+type BlockchainClient interface {
+	CreateEthAccount() (AccountData, error)
+}
+
+// EthClient provides methods to interact with an Ethereum blockchain network.
 // It uses the Ethereum client to query information and perform blockchain operations.
-type Client struct {
+type EthClient struct {
 	netUrl string
 	Client *ethclient.Client
 }
 
 // NewClient creates and returns a new Client instance connected to the specified Ethereum network URL.
-func NewClient(rawurl string) (*Client, error) {
+func NewClient(rawurl string) (*EthClient, error) {
 
 	client, err := ethclient.Dial(rawurl)
 	if err != nil {
 		return nil, fmt.Errorf("error establishing connection: %e", err)
 	}
 
-	return &Client{netUrl: rawurl, Client: client}, nil
+	return &EthClient{netUrl: rawurl, Client: client}, nil
 }
