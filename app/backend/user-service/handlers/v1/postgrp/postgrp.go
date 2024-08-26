@@ -191,7 +191,7 @@ func (h *Handler) GetById(ctx context.Context, w http.ResponseWriter, r *http.Re
 		return v1.NewRequestError(errors.New("id parse error"), http.StatusInternalServerError)
 	}
 
-	post, err := h.post.GetPostByID(ctx, id)
+	post, err := h.post.QueryById(ctx, id)
 	if err != nil {
 		return v1.NewRequestError(errors.New("get error "+err.Error()), http.StatusNotFound)
 	}

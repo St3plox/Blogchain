@@ -88,6 +88,7 @@ generate-contract:
 
 #------------------------------------------------------------------------------------------
 #TESTING
+#launch hardhat node before that 
 
 test-blockchain-auth:
 	go test ./foundation/blockchain/auth
@@ -96,18 +97,35 @@ test-blockchain-contract:
 	go test ./foundation/blockchain 
 
 
+test-cachestore:
+	go test ./foundation/cachestore
 
-#launch hardhat node before that 
 test-foundation:
 	make test-blockchain-auth
 	make test-blockchain-contract
+	make test-cachestore
 	
-
-test-cachestore:
-	go test ./foundation/cachestore
 
 test-userdb:
 	 go test  ./business/core/user/userdb
 
 test-user:
 	go test ./business/core/user
+
+test-mediadb:
+	 go test  ./business/core/media/mediadb
+
+test-media:
+	go test ./business/core/media
+
+
+test-post:
+	 go test  ./business/core/post
+
+test-business:
+	make test-user
+	make test-userdb
+	make test-mediadb
+	make test-media
+	make test-post
+	

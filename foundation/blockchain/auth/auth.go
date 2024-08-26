@@ -12,6 +12,10 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
+type ContractSigner interface{
+	GenerateAuth(ctx context.Context) (*bind.TransactOpts, error) 
+}
+
 type Admin struct {
 	privateKey []byte
 	client     *ethclient.Client

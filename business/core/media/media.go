@@ -32,23 +32,23 @@ type Storer interface {
 type Core struct {
 	storer      Storer
 	cacheStorer cachestore.CacheStore
-	userCore    *user.Core
+	userStore   user.Storer
 
 	MaxFileSizeMb int64
 }
 
-func NewCore(storer Storer, cacheStorer cachestore.CacheStore, userCore *user.Core) *Core {
+func NewCore(storer Storer, cacheStorer cachestore.CacheStore, userStore user.Storer) *Core {
 	return &Core{
 		storer:      storer,
 		cacheStorer: cacheStorer,
-		userCore:    userCore,
+		userStore:   userStore,
 	}
 }
 
 func (c *Core) Create(ctx context.Context, newMedia NewMedia) (MediaData, error) {
 	claims := auth.GetClaims(ctx)
 
-	user, err := c.userCore.QueryByID(ctx, claims.Subject)
+	user, err := c.userStore.QueryByID(ctx, claims.Subject)
 	if err != nil {
 		return MediaData{}, fmt.Errorf("media core create get user: %w", err)
 	}
@@ -71,7 +71,7 @@ func (c *Core) Create(ctx context.Context, newMedia NewMedia) (MediaData, error)
 func (c *Core) CreateMultiple(ctx context.Context, newMediaList []NewMedia) ([]MediaData, error) {
 	claims := auth.GetClaims(ctx)
 
-	user, err := c.userCore.QueryByID(ctx, claims.Subject)
+	user, err := c.userStore.QueryByID(ctx, claims.Subject)
 	if err != nil {
 		return nil, fmt.Errorf("media core create get user: %w", err)
 	}
@@ -115,7 +115,7 @@ func (c *Core) Delete(ctx context.Context, media Media) error {
 func (c *Core) DeleteByID(ctx context.Context, mediaID string) error {
 	claims := auth.GetClaims(ctx)
 
-	user, err := c.userCore.QueryByID(ctx, claims.Subject)
+	user, err := c.userStore.QueryByID(ctx, claims.Subject)
 	if err != nil {
 		return fmt.Errorf("media core error get user: %w", err)
 	}
@@ -152,6 +152,8 @@ func (c *Core) QueryByID(ctx context.Context, mediaID string) (Media, error) {
 		if err != redis.Nil {
 			return Media{}, fmt.Errorf("core cache get: %w", err)
 		}
+	} else {
+		return media, nil
 	}
 
 	media, err = c.storer.QueryByID(ctx, mediaID)

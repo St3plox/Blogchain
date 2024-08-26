@@ -13,13 +13,14 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
+
 type Core struct {
 	postContract *contract.PostContract
-	admin        *auth.Admin
+	admin        auth.ContractSigner
 	cacheStorer  cachestore.CacheStore
 }
 
-func NewCore(postContract *contract.PostContract, admin *auth.Admin, cacheStorer cachestore.CacheStore) *Core {
+func NewCore(postContract *contract.PostContract, admin auth.ContractSigner, cacheStorer cachestore.CacheStore) *Core {
 	return &Core{
 		postContract: postContract,
 		admin:        admin,
@@ -110,7 +111,7 @@ func (c *Core) QueryByAddress(ctx context.Context, userAddressHex string, page u
 
 	var result []Post
 	for _, post := range posts {
-		result = append(result,mapTo(post))
+		result = append(result, mapTo(post))
 	}
 
 	return result, nil
@@ -127,7 +128,7 @@ func (c *Core) QueryByIndex(ctx context.Context, userAddressHex string, index ui
 	return mapTo(post), nil
 }
 
-func (c *Core) GetPostByID(ctx context.Context, id *big.Int) (Post, error) {
+func (c *Core) QueryById(ctx context.Context, id *big.Int) (Post, error) {
 
 	{ // Checking for cached post
 		var post Post
