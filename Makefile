@@ -128,4 +128,7 @@ test-business:
 	make test-mediadb
 	make test-media
 	make test-post
-	
+
+make test-all:
+	make test-foundation
+	make test-business
