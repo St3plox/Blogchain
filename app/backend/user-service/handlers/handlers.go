@@ -30,7 +30,7 @@ func APIMux(cfg APIMuxConfig) *web.App {
 	uh := usergrp.New(cfg.UserCore, cfg.Auth)
 
 	//=================================================================================
-	//User exnpoints
+	//User endpoints
 
 	app.Handle(usergrp.RegisterUserPath, "POST", uh.RegisterUser)
 	app.Handle(usergrp.LoginUserPath, "POST", uh.LoginUser)
