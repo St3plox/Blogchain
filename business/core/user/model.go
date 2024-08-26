@@ -1,9 +1,11 @@
 package user
 
 import (
+	"fmt"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type User struct {
@@ -57,7 +59,7 @@ func IdToCacheKey(id string) string {
 
 //==============================================================================
 
-func Map(user User) UserDTO {
+func MapToDto(user User) UserDTO {
 	return UserDTO{
 		ID:          user.ID.Hex(),
 		Name:        user.Name,
@@ -67,4 +69,18 @@ func Map(user User) UserDTO {
 		DateCreated: user.DateCreated,
 		DateUpdated: user.DateUpdated,
 	}
+}
+
+func MapToUser(nu NewUser) (User, error) {
+
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(nu.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return User{}, fmt.Errorf("map error : %w", err)
+	}
+
+	return User{
+		Name:         nu.Name,
+		Email:        nu.Email,
+		PasswordHash: passwordHash,
+	}, nil
 }

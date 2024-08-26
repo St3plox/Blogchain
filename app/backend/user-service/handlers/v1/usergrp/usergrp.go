@@ -40,7 +40,12 @@ func (h *Handler) RegisterUser(ctx context.Context, w http.ResponseWriter, r *ht
 		return v1.NewRequestError(errors.New("Decode error "+err.Error()), http.StatusInternalServerError)
 	}
 
-	usr, err := h.user.Create(ctx, nu)
+	newUser, err := user.MapToUser(nu)
+	if err != nil {
+		return v1.NewRequestError(errors.New("User map error"+err.Error()), http.StatusInternalServerError)
+	}
+
+	usr, err := h.user.Create(ctx, newUser)
 	if err != nil {
 		h.user.Delete(ctx, usr)
 		return v1.NewRequestError(errors.New("Create error "+err.Error()), http.StatusBadRequest)
@@ -62,7 +67,7 @@ func (h *Handler) RegisterUser(ctx context.Context, w http.ResponseWriter, r *ht
 	// Set JWT token in response header
 	w.Header().Set("Authorization", "Bearer "+token)
 
-	err = web.Respond(ctx, w, user.Map(usr), http.StatusCreated)
+	err = web.Respond(ctx, w, user.MapToDto(usr), http.StatusCreated)
 	if err != nil {
 		h.user.Delete(ctx, usr)
 		return err
@@ -118,7 +123,7 @@ func (h *Handler) LoginUser(ctx context.Context, w http.ResponseWriter, r *http.
 	// Set JWT token in response header
 	w.Header().Set("Authorization", token)
 
-	err = web.Respond(ctx, w, user.Map(usr), http.StatusOK)
+	err = web.Respond(ctx, w, user.MapToDto(usr), http.StatusOK)
 	if err != nil {
 		return err
 	}

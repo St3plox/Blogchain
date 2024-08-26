@@ -51,9 +51,7 @@ logs-service:
 stop-service:
 	docker stop $(BACKEND_NAME)
 	docker rm $(BACKEND_NAME)
-
-run-tests:
-	go test ./foundation/blockchain 
+ 
 
 launch-hardhat:
 	npx hardhat node
@@ -86,3 +84,51 @@ solc-compile:
 generate-contract:
 	abigen --abi=contracts/bin/PostStorage.abi --bin=contracts/bin/PostStorage.bin --pkg=contract --out=foundation/blockchain/contract/post_storage.go
 
+
+
+#------------------------------------------------------------------------------------------
+#TESTING
+#launch hardhat node before that 
+
+test-blockchain-auth:
+	go test ./foundation/blockchain/auth
+
+test-blockchain-contract:
+	go test ./foundation/blockchain 
+
+
+test-cachestore:
+	go test ./foundation/cachestore
+
+test-foundation:
+	make test-blockchain-auth
+	make test-blockchain-contract
+	make test-cachestore
+	
+
+test-userdb:
+	 go test  ./business/core/user/userdb
+
+test-user:
+	go test ./business/core/user
+
+test-mediadb:
+	 go test  ./business/core/media/mediadb
+
+test-media:
+	go test ./business/core/media
+
+
+test-post:
+	 go test  ./business/core/post
+
+test-business:
+	make test-user
+	make test-userdb
+	make test-mediadb
+	make test-media
+	make test-post
+
+make test-all:
+	make test-foundation
+	make test-business

@@ -8,7 +8,7 @@ import (
 	"github.com/gabriel-vasile/mimetype"
 )
 
-// ParseMedia function is utility function that hepls hendlers to parse media from http request
+// ParseMedia function is utility function that helps handlers to parse media from http request
 func (c *Core) ParseMedia(r *http.Request) (NewMedia, error) {
 	// Parse the multipart form, allowing for a maximum upload MaxFileSizeMb
 	err := r.ParseMultipartForm(c.MaxFileSizeMb << 20)

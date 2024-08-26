@@ -27,7 +27,7 @@ type MediaData struct {
 
 // GenUrl generates part of url for downloading the mediafile
 func (m Media) GenUrl() string {
-	return "/media/" + m.ID.Hex()
+	return "/v1/media/" + m.ID.Hex()
 }
 
 func (m Media) CacheKey() string {

@@ -7,7 +7,6 @@ import (
 	"net/mail"
 	"time"
 
-	"github.com/St3plox/Blogchain/business/data/order"
 	"github.com/St3plox/Blogchain/foundation/blockchain"
 	"github.com/St3plox/Blogchain/foundation/cachestore"
 	"github.com/St3plox/Blogchain/foundation/keystore"
@@ -24,9 +23,8 @@ var (
 
 type Storer interface {
 	Create(ctx context.Context, usr User) (User, error)
-	Update(ctx context.Context, usr User) error
 	Delete(ctx context.Context, usr User) error
-	Query(ctx context.Context, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]User, error)
+	// Query(ctx context.Context, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]User, error)
 	Count(ctx context.Context, filter QueryFilter) (int, error)
 	QueryByID(ctx context.Context, userID string) (User, error)
 	QueryByIDs(ctx context.Context, userID []string) ([]User, error)
@@ -36,12 +34,12 @@ type Storer interface {
 // Core manages the set of APIs for user access.
 type Core struct {
 	storer      Storer
-	ethClient   *blockchain.Client
+	ethClient   blockchain.BlockchainClient
 	cacheStorer cachestore.CacheStore
 }
 
 // NewCore constructs a core for user api access.
-func NewCore(storer Storer, ethClient *blockchain.Client, cacheStorer cachestore.CacheStore) (*Core, error) {
+func NewCore(storer Storer, ethClient blockchain.BlockchainClient, cacheStorer cachestore.CacheStore) (*Core, error) {
 
 	return &Core{
 		storer:      storer,
@@ -51,7 +49,7 @@ func NewCore(storer Storer, ethClient *blockchain.Client, cacheStorer cachestore
 }
 
 // Create inserts a new user into the database.
-func (c *Core) Create(ctx context.Context, nu NewUser) (User, error) {
+func (c *Core) Create(ctx context.Context, newUser User) (User, error) {
 
 	account, err := c.ethClient.CreateEthAccount()
 	if err != nil {
@@ -66,35 +64,25 @@ func (c *Core) Create(ctx context.Context, nu NewUser) (User, error) {
 		return User{}, fmt.Errorf("create : %w", err)
 	}
 
-	passwordHash, err := bcrypt.GenerateFromPassword([]byte(nu.Password), bcrypt.DefaultCost)
-	if err != nil {
-		return User{}, fmt.Errorf("create : %w", err)
-	}
-
 	// TODO: Private key encryption
-	user := User{
-		Name:         nu.Name,
-		Email:        nu.Email,
-		PasswordHash: passwordHash,
-		Roles:        roles,
-		DateCreated:  now,
-		DateUpdated:  now,
-		PublicKey:    account.PublicKey,
-		PrivateKey:   account.PrivateKey,
-		SecretKey:    secretKey,
-		AddressHex:   account.AddressHex,
-	}
+	newUser.Roles = roles
+	newUser.DateCreated = now
+	newUser.DateUpdated = now
+	newUser.PublicKey = account.PublicKey
+	newUser.PrivateKey = account.PrivateKey
+	newUser.SecretKey = secretKey
+	newUser.AddressHex = account.AddressHex
 
-	usr, err := c.storer.Create(ctx, user)
+	newUser, err = c.storer.Create(ctx, newUser)
 	if err != nil {
 		return User{}, fmt.Errorf("create: %w", err)
 	}
 
-	if err = c.cacheStorer.Set(ctx, user); err != nil {
+	if err = c.cacheStorer.Set(ctx, newUser); err != nil {
 		return User{}, fmt.Errorf("cache set: %w", err)
 	}
 
-	return usr, nil
+	return newUser, nil
 }
 
 // Delete removes a user from the database.
@@ -112,14 +100,14 @@ func (c *Core) Delete(ctx context.Context, usr User) error {
 }
 
 // Query retrieves a list of existing users from the database.
-func (c *Core) Query(ctx context.Context, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]User, error) {
-	users, err := c.storer.Query(ctx, filter, orderBy, pageNumber, rowsPerPage)
-	if err != nil {
-		return nil, fmt.Errorf("query: %w", err)
-	}
+// func (c *Core) Query(ctx context.Context, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]User, error) {
+// 	users, err := c.storer.Query(ctx, filter, orderBy, pageNumber, rowsPerPage)
+// 	if err != nil {
+// 		return nil, fmt.Errorf("query: %w", err)
+// 	}
 
-	return users, nil
-}
+// 	return users, nil
+// }
 
 // Count returns the total number of users in the store.
 func (c *Core) Count(ctx context.Context, filter QueryFilter) (int, error) {
