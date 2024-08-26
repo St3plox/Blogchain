@@ -119,9 +119,9 @@ Frontend can be accessed on port 8080, backend - 3000
 - [X] Caching
 - [X] Documentation
 - [X] Media support (backend)
-- [ ] Testing
+- [X] Testing (very basic except app layer)
+- [ ] Recommendation engine
 - [ ] CI/CD (or smth like this)
-- [ ] Recomendation engine
 - [ ] Improved UI/UX (no way)
 
 See the [open issues](https://github.com/St3plox/Blogchain/issues) for a full list of proposed features (and known issues).
