@@ -4,95 +4,44 @@ import (
 	"context"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/St3plox/Blogchain/business/core/like"
 	"github.com/St3plox/Blogchain/business/core/like/likedb"
+	"github.com/St3plox/Blogchain/foundation/web/testutil"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/testcontainers/testcontainers-go"
-	"github.com/testcontainers/testcontainers-go/wait"
+
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var (
-	mongoClient *mongo.Client
-	mongoURI    string
-)
+var testEnv *testutil.TestEnv
+var logger zerolog.Logger
 
 func TestMain(m *testing.M) {
 	ctx := context.Background()
 
-	// Start MongoDB container
-	mongoC, err := startMongoContainer(ctx)
-	if err != nil {
-		panic(err)
-	}
-	defer mongoC.Terminate(ctx)
-
-	// Connect to MongoDB
-	clientOptions := options.Client().ApplyURI(mongoURI)
-	client, err := mongo.Connect(ctx, clientOptions)
+	var err error
+	testEnv, err = testutil.SetupMongoDBContainer(ctx)
 	if err != nil {
 		panic(err)
 	}
 
-	// Ensure MongoDB connection is established
-	err = client.Ping(ctx, nil)
-	if err != nil {
-		panic(err)
-	}
+	logger = zerolog.New(os.Stdout).With().Timestamp().Logger()
 
-	mongoClient = client
-
-	// Run the tests
 	code := m.Run()
 
-	// Disconnect MongoDB after tests are done
-	if err := client.Disconnect(ctx); err != nil {
-		panic(err)
+	if err := testEnv.Teardown(ctx); err != nil {
+		os.Exit(1)
 	}
 
 	os.Exit(code)
 }
 
-func startMongoContainer(ctx context.Context) (testcontainers.Container, error) {
-	req := testcontainers.ContainerRequest{
-		Image:        "mongo:latest",
-		ExposedPorts: []string{"27017/tcp"},
-		WaitingFor:   wait.ForLog("Waiting for connections").WithStartupTimeout(10 * time.Second),
-	}
-
-	mongoC, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
-		ContainerRequest: req,
-		Started:          true,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	// Get MongoDB URI
-	host, err := mongoC.Host(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	port, err := mongoC.MappedPort(ctx, "27017")
-	if err != nil {
-		return nil, err
-	}
-
-	mongoURI = "mongodb://" + host + ":" + port.Port()
-	return mongoC, nil
-}
-
 func TestStore(t *testing.T) {
+
 	ctx := context.Background()
-	log := zerolog.New(os.Stdout) // Use logger or configure as needed
-	store := likedb.NewStore(&log, mongoClient)
+	store := likedb.NewStore(&logger, testEnv.MongoClient)
 
 	t.Run("Create and QueryByID", func(t *testing.T) {
 		likeID := primitive.NewObjectID()

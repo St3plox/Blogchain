@@ -4,98 +4,43 @@ import (
 	"context"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/St3plox/Blogchain/business/core/media"
 	"github.com/St3plox/Blogchain/business/core/media/mediadb"
+	"github.com/St3plox/Blogchain/foundation/web/testutil"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/testcontainers/testcontainers-go"
-	"github.com/testcontainers/testcontainers-go/wait"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var mongoURI string
-var mongoClient *mongo.Client
+var testEnv *testutil.TestEnv
+var logger zerolog.Logger
 
-// TestMain sets up the MongoDB container and runs the tests
 func TestMain(m *testing.M) {
 	ctx := context.Background()
 
-	// Start MongoDB container
-	mongoC, err := startMongoContainer(ctx)
-	if err != nil {
-		panic(err)
-	}
-	defer mongoC.Terminate(ctx)
-
-	// Connect to MongoDB
-	clientOptions := options.Client().ApplyURI(mongoURI)
-	client, err := mongo.Connect(ctx, clientOptions)
+	var err error
+	testEnv, err = testutil.SetupMongoDBContainer(ctx)
 	if err != nil {
 		panic(err)
 	}
 
-	// Ensure MongoDB connection is established
-	err = client.Ping(ctx, nil)
-	if err != nil {
-		panic(err)
-	}
+	logger = zerolog.New(os.Stdout).With().Timestamp().Logger()
 
-	mongoClient = client
-
-	// Run the tests
 	code := m.Run()
 
-	// Disconnect MongoDB after tests are done
-	if err := client.Disconnect(ctx); err != nil {
-		panic(err)
+	if err := testEnv.Teardown(ctx); err != nil {
+		os.Exit(1)
 	}
 
 	os.Exit(code)
 }
 
-// Function to start the MongoDB container using TestContainers
-func startMongoContainer(ctx context.Context) (testcontainers.Container, error) {
-	req := testcontainers.ContainerRequest{
-		Image:        "mongo:latest",
-		ExposedPorts: []string{"27017/tcp"},
-		WaitingFor:   wait.ForLog("Waiting for connections").WithStartupTimeout(10 * time.Second),
-	}
-
-	mongoC, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
-		ContainerRequest: req,
-		Started:          true,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	// Get MongoDB URI
-	host, err := mongoC.Host(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	port, err := mongoC.MappedPort(ctx, "27017")
-	if err != nil {
-		return nil, err
-	}
-
-	mongoURI = "mongodb://" + host + ":" + port.Port()
-	return mongoC, nil
-}
-
-// Example test for creating media in the MongoDB database
 func TestStore_Create(t *testing.T) {
 	ctx := context.Background()
 
-	// Set up logger and create the Store instance
-	logger := zerolog.New(os.Stdout)
-	store := mediadb.NewStore(&logger, mongoClient)
+	store := mediadb.NewStore(&logger, testEnv.MongoClient)
 
 	// Test data
 	media := media.Media{
@@ -121,9 +66,7 @@ func TestStore_Create(t *testing.T) {
 func TestStore_DeleteByID(t *testing.T) {
 	ctx := context.Background()
 
-	// Set up logger and create the Store instance
-	logger := zerolog.New(os.Stdout)
-	store := mediadb.NewStore(&logger, mongoClient)
+	store := mediadb.NewStore(&logger, testEnv.MongoClient)
 
 	// Test data
 	testMedia := media.Media{
@@ -150,8 +93,8 @@ func TestStore_DeleteByID(t *testing.T) {
 
 func TestStore_CreateMultiple(t *testing.T) {
 	ctx := context.Background()
-	logger := zerolog.New(os.Stdout)
-	store := mediadb.NewStore(&logger, mongoClient)
+
+	store := mediadb.NewStore(&logger, testEnv.MongoClient)
 
 	mediaList := []media.Media{
 		{
@@ -177,8 +120,8 @@ func TestStore_CreateMultiple(t *testing.T) {
 
 func TestStore_Update(t *testing.T) {
 	ctx := context.Background()
-	logger := zerolog.New(os.Stdout)
-	store := mediadb.NewStore(&logger, mongoClient)
+
+	store := mediadb.NewStore(&logger, testEnv.MongoClient)
 
 	media := media.Media{
 		OwnerID:   primitive.NewObjectID(),
@@ -203,8 +146,8 @@ func TestStore_Update(t *testing.T) {
 
 func TestStore_Delete(t *testing.T) {
 	ctx := context.Background()
-	logger := zerolog.New(os.Stdout)
-	store := mediadb.NewStore(&logger, mongoClient)
+
+	store := mediadb.NewStore(&logger, testEnv.MongoClient)
 
 	testMedia := media.Media{
 		OwnerID:   primitive.NewObjectID(),
@@ -226,8 +169,8 @@ func TestStore_Delete(t *testing.T) {
 
 func TestStore_QueryByIDs(t *testing.T) {
 	ctx := context.Background()
-	logger := zerolog.New(os.Stdout)
-	store := mediadb.NewStore(&logger, mongoClient)
+
+	store := mediadb.NewStore(&logger, testEnv.MongoClient)
 
 	mediaList := []media.Media{
 		{

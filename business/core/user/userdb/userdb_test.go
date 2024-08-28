@@ -5,81 +5,41 @@ import (
 	"net/mail"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/St3plox/Blogchain/business/core/user"
 	"github.com/St3plox/Blogchain/business/core/user/userdb"
+	"github.com/St3plox/Blogchain/foundation/web/testutil"
 	"github.com/rs/zerolog"
-	"github.com/testcontainers/testcontainers-go"
-	"github.com/testcontainers/testcontainers-go/wait"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var mongoURI string
+var testEnv *testutil.TestEnv
+var logger zerolog.Logger
 
-// Setup MongoDB container for integration tests
 func TestMain(m *testing.M) {
 	ctx := context.Background()
 
-	// Start a MongoDB container using TestContainers
-	mongoC, err := startMongoContainer(ctx)
+	var err error
+	testEnv, err = testutil.SetupMongoDBContainer(ctx)
 	if err != nil {
 		panic(err)
 	}
-	defer mongoC.Terminate(ctx)
 
-	// Run tests
+	logger = zerolog.New(os.Stdout).With().Timestamp().Logger()
+
 	code := m.Run()
 
+	if err := testEnv.Teardown(ctx); err != nil {
+		os.Exit(1)
+	}
+
 	os.Exit(code)
-}
-
-// Function to start the MongoDB container using TestContainers
-func startMongoContainer(ctx context.Context) (testcontainers.Container, error) {
-	req := testcontainers.ContainerRequest{
-		Image:        "mongo:latest",
-		ExposedPorts: []string{"27017/tcp"},
-		WaitingFor:   wait.ForLog("Waiting for connections").WithStartupTimeout(10 * time.Second),
-	}
-
-	mongoC, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
-		ContainerRequest: req,
-		Started:          true,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	// Get MongoDB URI
-	host, err := mongoC.Host(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	port, err := mongoC.MappedPort(ctx, "27017")
-	if err != nil {
-		return nil, err
-	}
-
-	mongoURI = "mongodb://" + host + ":" + port.Port()
-	return mongoC, nil
 }
 
 // TestStore_Create tests the Create method using the MongoDB container
 func TestStore_Create(t *testing.T) {
 	ctx := context.Background()
 
-	// Connect to the MongoDB instance
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(mongoURI))
-	if err != nil {
-		t.Fatalf("Failed to connect to MongoDB: %v", err)
-	}
-	defer client.Disconnect(ctx)
-
-	// Setup logger and store
-	logger := zerolog.New(os.Stdout).With().Timestamp().Logger()
-	store := userdb.NewStore(&logger, client)
+	store := userdb.NewStore(&logger, testEnv.MongoClient)
 
 	// Example user
 	email, _ := mail.ParseAddress("test@example.com")
@@ -103,16 +63,7 @@ func TestStore_Create(t *testing.T) {
 func TestStore_Update(t *testing.T) {
 	ctx := context.Background()
 
-	// Connect to MongoDB instance
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(mongoURI))
-	if err != nil {
-		t.Fatalf("Failed to connect to MongoDB: %v", err)
-	}
-	defer client.Disconnect(ctx)
-
-	// Setup logger and store
-	logger := zerolog.New(os.Stdout).With().Timestamp().Logger()
-	store := userdb.NewStore(&logger, client)
+	store := userdb.NewStore(&logger, testEnv.MongoClient)
 
 	// Create a user first
 	email, _ := mail.ParseAddress("update_test@example.com")
@@ -147,16 +98,7 @@ func TestStore_Update(t *testing.T) {
 func TestStore_Delete(t *testing.T) {
 	ctx := context.Background()
 
-	// Connect to MongoDB instance
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(mongoURI))
-	if err != nil {
-		t.Fatalf("Failed to connect to MongoDB: %v", err)
-	}
-	defer client.Disconnect(ctx)
-
-	// Setup logger and store
-	logger := zerolog.New(os.Stdout).With().Timestamp().Logger()
-	store := userdb.NewStore(&logger, client)
+	store := userdb.NewStore(&logger, testEnv.MongoClient)
 
 	// Create a user first
 	email, _ := mail.ParseAddress("delete_test@example.com")
@@ -186,16 +128,7 @@ func TestStore_Delete(t *testing.T) {
 func TestStore_QueryByID(t *testing.T) {
 	ctx := context.Background()
 
-	// Connect to MongoDB instance
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(mongoURI))
-	if err != nil {
-		t.Fatalf("Failed to connect to MongoDB: %v", err)
-	}
-	defer client.Disconnect(ctx)
-
-	// Setup logger and store
-	logger := zerolog.New(os.Stdout).With().Timestamp().Logger()
-	store := userdb.NewStore(&logger, client)
+	store := userdb.NewStore(&logger, testEnv.MongoClient)
 
 	// Create a user first
 	email, _ := mail.ParseAddress("query_by_id_test@example.com")

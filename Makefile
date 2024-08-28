@@ -122,12 +122,16 @@ test-media:
 test-post:
 	 go test  ./business/core/post
 
+test-likedb:
+	go test  ./business/core/like/likedb
+
 test-business:
 	make test-user
 	make test-userdb
 	make test-mediadb
 	make test-media
 	make test-post
+	make test-likedb
 
 make test-all:
 	make test-foundation
