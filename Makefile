@@ -125,6 +125,9 @@ test-post:
 test-likedb:
 	go test  ./business/core/like/likedb
 
+test-like:
+	go test  ./business/core/like
+
 test-business:
 	make test-user
 	make test-userdb

@@ -39,7 +39,6 @@ func TestMain(m *testing.M) {
 }
 
 func TestStore(t *testing.T) {
-
 	ctx := context.Background()
 	store := likedb.NewStore(&logger, testEnv.MongoClient)
 
@@ -88,6 +87,35 @@ func TestStore(t *testing.T) {
 		likes, err := store.QueryAllByUserID(ctx, userID.Hex())
 		require.NoError(t, err)
 		assert.Len(t, likes, 2)
+	})
+
+	t.Run("QueryAllByPostID", func(t *testing.T) {
+		postID := primitive.NewObjectID()
+		like1 := like.Like{
+			ID:         primitive.NewObjectID(),
+			UserID:     primitive.NewObjectID(),
+			PostID:     postID,
+			IsPositive: true,
+		}
+		like2 := like.Like{
+			ID:         primitive.NewObjectID(),
+			UserID:     primitive.NewObjectID(),
+			PostID:     postID,
+			IsPositive: false,
+		}
+
+		// Insert likes
+		_, err := store.Create(ctx, like1)
+		require.NoError(t, err)
+		_, err = store.Create(ctx, like2)
+		require.NoError(t, err)
+
+		// Test QueryAllByPostID
+		likes, err := store.QueryAllByPostID(ctx, postID.Hex())
+		require.NoError(t, err)
+		assert.Len(t, likes, 2)
+		assert.Equal(t, postID, likes[0].PostID)
+		assert.Equal(t, postID, likes[1].PostID)
 	})
 
 	t.Run("Update and DeleteByID", func(t *testing.T) {

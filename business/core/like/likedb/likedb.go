@@ -116,3 +116,26 @@ func (s *Store) DeleteByID(ctx context.Context, likeID string) error {
 	}
 	return nil
 }
+
+// QueryAllByPostID retrieves all Like documents for a specific post.
+func (s *Store) QueryAllByPostID(ctx context.Context, postID string) ([]like.Like, error) {
+	objectID, err := primitive.ObjectIDFromHex(postID)
+	if err != nil {
+		s.log.Error().Err(err).Msg("Invalid Post ID format")
+		return nil, ErrInvalidIDFormat
+	}
+
+	cursor, err := s.collection.Find(ctx, bson.M{"post_id": objectID})
+	if err != nil {
+		s.log.Error().Err(err).Msg("Failed to query Likes by Post ID")
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var likes []like.Like
+	if err = cursor.All(ctx, &likes); err != nil {
+		s.log.Error().Err(err).Msg("Failed to decode Likes")
+		return nil, err
+	}
+	return likes, nil
+}

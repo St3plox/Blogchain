@@ -15,50 +15,10 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// MockStorer mocks the Storer interface.
-type MockStorer struct {
-	mock.Mock
-}
-
-func (m *MockStorer) Create(ctx context.Context, usr user.User) (user.User, error) {
-	args := m.Called(ctx, usr)
-	return args.Get(0).(user.User), args.Error(1)
-}
-
-func (m *MockStorer) Delete(ctx context.Context, usr user.User) error {
-	args := m.Called(ctx, usr)
-	return args.Error(0)
-}
-
-func (m *MockStorer) Query(ctx context.Context, filter user.QueryFilter, orderBy string, pageNumber int, rowsPerPage int) ([]user.User, error) {
-	args := m.Called(ctx, filter, orderBy, pageNumber, rowsPerPage)
-	return args.Get(0).([]user.User), args.Error(1)
-}
-
-func (m *MockStorer) Count(ctx context.Context, filter user.QueryFilter) (int, error) {
-	args := m.Called(ctx, filter)
-	return args.Int(0), args.Error(1)
-}
-
-func (m *MockStorer) QueryByID(ctx context.Context, userID string) (user.User, error) {
-	args := m.Called(ctx, userID)
-	return args.Get(0).(user.User), args.Error(1)
-}
-
-func (m *MockStorer) QueryByIDs(ctx context.Context, userIDs []string) ([]user.User, error) {
-	args := m.Called(ctx, userIDs)
-	return args.Get(0).([]user.User), args.Error(1)
-}
-
-func (m *MockStorer) QueryByEmail(ctx context.Context, email mail.Address) (user.User, error) {
-	args := m.Called(ctx, email)
-	return args.Get(0).(user.User), args.Error(1)
-}
-
 func TestCore_QueryByIDFromCahe(t *testing.T) {
 	// Setup
 	mockCacheStorer := new(cachestore.MockCacheStore)
-	mockStorer := new(MockStorer)
+	mockStorer := new(user.MockStorer)
 	core, _ := user.NewCore(mockStorer, nil, mockCacheStorer)
 
 	expectedUser := user.User{
@@ -90,7 +50,7 @@ func TestCore_QueryByIDFromCahe(t *testing.T) {
 func TestCore_QueryByIDNoCache(t *testing.T) {
 	// Setup
 	mockCacheStorer := new(cachestore.MockCacheStore)
-	mockStorer := new(MockStorer)
+	mockStorer := new(user.MockStorer)
 	core, _ := user.NewCore(mockStorer, nil, mockCacheStorer)
 
 	expectedUser := user.User{
@@ -125,7 +85,7 @@ func TestCore_QueryByIDNoCache(t *testing.T) {
 func TestCore_Create(t *testing.T) {
 	// Setup
 	mockCacheStorer := new(cachestore.MockCacheStore)
-	mockStorer := new(MockStorer)
+	mockStorer := new(user.MockStorer)
 	mockEthClient := new(blockchain.MockClient)
 	core, _ := user.NewCore(mockStorer, mockEthClient, mockCacheStorer)
 
@@ -175,7 +135,7 @@ func TestCore_Create(t *testing.T) {
 func TestCore_Delete(t *testing.T) {
 	// Setup
 	mockCacheStorer := new(cachestore.MockCacheStore)
-	mockStorer := new(MockStorer)
+	mockStorer := new(user.MockStorer)
 	core, _ := user.NewCore(mockStorer, nil, mockCacheStorer)
 
 	usr := user.User{
@@ -208,7 +168,7 @@ func TestCore_Delete(t *testing.T) {
 // TestCore_Count verifies that the Count function correctly returns the total number of users.
 func TestCore_Count(t *testing.T) {
 	// Setup
-	mockStorer := new(MockStorer)
+	mockStorer := new(user.MockStorer)
 	core, _ := user.NewCore(mockStorer, nil, nil)
 
 	filter := user.QueryFilter{}
@@ -233,7 +193,7 @@ func TestCore_Count(t *testing.T) {
 // TestCore_QueryByEmail verifies that the QueryByEmail function retrieves the correct user.
 func TestCore_QueryByEmail(t *testing.T) {
 	// Setup
-	mockStorer := new(MockStorer)
+	mockStorer := new(user.MockStorer)
 	core, _ := user.NewCore(mockStorer, nil, nil)
 
 	email, _ := mail.ParseAddress("query.by.email@example.com")
@@ -262,7 +222,7 @@ func TestCore_QueryByEmail(t *testing.T) {
 // TestCore_Authenticate verifies that the Authenticate function checks the email and password correctly.
 func TestCore_Authenticate(t *testing.T) {
 	// Setup
-	mockStorer := new(MockStorer)
+	mockStorer := new(user.MockStorer)
 	core, _ := user.NewCore(mockStorer, nil, nil)
 
 	email, _ := mail.ParseAddress("auth.user@example.com")
