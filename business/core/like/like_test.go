@@ -63,7 +63,7 @@ func TestCore_Create(t *testing.T) {
 		ID: userID,
 	}
 	newLike := like.Like{
-		PostID:     primitive.NewObjectID(),
+		PostID:		1,
 		IsPositive: true,
 	}
 	expectedLike := newLike
@@ -97,7 +97,7 @@ func TestCore_QueryByID_CacheHit(t *testing.T) {
 	expectedLike := like.Like{
 		ID:         primitive.NewObjectID(),
 		UserID:     primitive.NewObjectID(),
-		PostID:     primitive.NewObjectID(),
+		PostID:     1,
 		IsPositive: true,
 	}
 
@@ -129,7 +129,7 @@ func TestCore_QueryByID_CacheMiss(t *testing.T) {
 	expectedLike := like.Like{
 		ID:         primitive.NewObjectID(),
 		UserID:     primitive.NewObjectID(),
-		PostID:     primitive.NewObjectID(),
+		PostID:     1,
 		IsPositive: true,
 	}
 
@@ -160,7 +160,7 @@ func TestCore_Update(t *testing.T) {
 	updatedLike := like.Like{
 		ID:         primitive.NewObjectID(),
 		UserID:     primitive.NewObjectID(),
-		PostID:     primitive.NewObjectID(),
+		PostID:     1,
 		IsPositive: false,
 	}
 

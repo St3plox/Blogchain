@@ -31,6 +31,9 @@ func NewStore(log *zerolog.Logger, client *mongo.Client) *Store {
 
 // Create inserts a new Like document into the collection.
 func (s *Store) Create(ctx context.Context, newLike like.Like) (like.Like, error) {
+
+	newLike.ID = primitive.NewObjectID()
+
 	_, err := s.collection.InsertOne(ctx, newLike)
 	if err != nil {
 		s.log.Error().Err(err).Msg("Failed to create Like")
@@ -119,13 +122,8 @@ func (s *Store) DeleteByID(ctx context.Context, likeID string) error {
 
 // QueryAllByPostID retrieves all Like documents for a specific post.
 func (s *Store) QueryAllByPostID(ctx context.Context, postID string) ([]like.Like, error) {
-	objectID, err := primitive.ObjectIDFromHex(postID)
-	if err != nil {
-		s.log.Error().Err(err).Msg("Invalid Post ID format")
-		return nil, ErrInvalidIDFormat
-	}
 
-	cursor, err := s.collection.Find(ctx, bson.M{"post_id": objectID})
+	cursor, err := s.collection.Find(ctx, bson.M{"post_id": postID})
 	if err != nil {
 		s.log.Error().Err(err).Msg("Failed to query Likes by Post ID")
 		return nil, err

@@ -3,9 +3,11 @@ package handlers
 import (
 	"os"
 
+	"github.com/St3plox/Blogchain/app/backend/user-service/handlers/v1/likegrp"
 	"github.com/St3plox/Blogchain/app/backend/user-service/handlers/v1/mediagrp"
 	"github.com/St3plox/Blogchain/app/backend/user-service/handlers/v1/postgrp"
 	"github.com/St3plox/Blogchain/app/backend/user-service/handlers/v1/usergrp"
+	"github.com/St3plox/Blogchain/business/core/like"
 	"github.com/St3plox/Blogchain/business/core/media"
 	"github.com/St3plox/Blogchain/business/core/post"
 	"github.com/St3plox/Blogchain/business/core/user"
@@ -22,6 +24,7 @@ type APIMuxConfig struct {
 	UserCore  *user.Core
 	PostCore  *post.Core
 	MediaCore *media.Core
+	LikeCore  *like.Core
 }
 
 func APIMux(cfg APIMuxConfig) *web.App {
@@ -60,5 +63,17 @@ func APIMux(cfg APIMuxConfig) *web.App {
 	app.Handle(mediagrp.PostMultiple, "POST", mc.PostMultiple, mid.Authenticate(cfg.Auth), mid.Authorize(cfg.Auth, auth.RuleAny))
 	app.Handle(mediagrp.DeletePath, "DELETE", mc.Delete, mid.Authenticate(cfg.Auth), mid.Authorize(cfg.Auth, auth.RuleAny))
 
+
+	//=================================================================================
+	//Like endpoints
+
+	lg := likegrp.New(cfg.LikeCore)
+
+	app.Handle(likegrp.GetPath, "GET", lg.Get)
+	app.Handle(likegrp.GetByUserOrPostIDPath, "GET", lg.GetByUserOrPostID)
+	app.Handle(likegrp.PostPath, "POST", lg.Create, mid.Authenticate(cfg.Auth), mid.Authorize(cfg.Auth, auth.RuleAny))
+	app.Handle(likegrp.PutPath, "PUT", lg.Update, mid.Authenticate(cfg.Auth), mid.Authorize(cfg.Auth, auth.RuleAny))
+	app.Handle(likegrp.DeletePath, "DELETE", lg.Delete, mid.Authenticate(cfg.Auth), mid.Authorize(cfg.Auth, auth.RuleAny))
+	
 	return app
 }

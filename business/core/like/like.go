@@ -98,6 +98,7 @@ func (c *Core) QueryAllByUserID(ctx context.Context, userID string) ([]Like, err
 
 func (c *Core) Update(ctx context.Context, updatedLike Like) (Like, error) {
 
+	//TODO: add check that this user updates like
 	updatedLike, err := c.storer.Update(ctx, updatedLike)
 	if err != nil {
 		return Like{}, fmt.Errorf("error updating like: %w", err)
@@ -124,4 +125,3 @@ func (c *Core) DeleteByID(ctx context.Context, likeID string) error {
 
 	return nil
 }
-

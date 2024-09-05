@@ -13,6 +13,8 @@ import (
 	defaultLog "log"
 
 	"github.com/St3plox/Blogchain/app/backend/user-service/handlers"
+	"github.com/St3plox/Blogchain/business/core/like"
+	"github.com/St3plox/Blogchain/business/core/like/likedb"
 	"github.com/St3plox/Blogchain/business/core/media"
 	"github.com/St3plox/Blogchain/business/core/media/mediadb"
 	"github.com/St3plox/Blogchain/business/core/post"
@@ -240,6 +242,11 @@ func run(log *zerolog.Logger) error {
 	mediaCore.MaxFileSizeMb = maxSize
 
 	// -------------------------------------------------------------------------
+	//likes support
+	likeDb := likedb.NewStore(log, client)
+	likeCore := like.NewCore(redisClient, likeDb, userCore)
+
+	// -------------------------------------------------------------------------
 	// Initialize authentication support
 
 	log.Info().Str("status", "startup").Msg("initializing V1 API AUTH support")
@@ -295,6 +302,7 @@ func run(log *zerolog.Logger) error {
 		UserCore:  userCore,
 		PostCore:  postCore,
 		MediaCore: mediaCore,
+		LikeCore:  likeCore,
 	})
 
 	apiMux.Handle("/swagger", "GET", swaggerHandler())

@@ -9,13 +9,13 @@ import (
 type Like struct {
 	ID         primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
 	UserID     primitive.ObjectID `json:"user_id,omitempty" bson:"user_id,omitempty"`
-	PostID     primitive.ObjectID `json:"post_id" bson:"post_id,omitempty"`
+	PostID     int64              `json:"post_id" bson:"post_id,omitempty"`
 	IsPositive bool               `json:"is_positive"`
 }
 
 type NewLike struct {
-	PostID     primitive.ObjectID `json:"post_id"`
-	IsPositive bool               `json:"is_positive"`
+	PostID     int64 `json:"post_id"`
+	IsPositive bool  `json:"is_positive"`
 }
 
 func (l Like) CacheKey() string {

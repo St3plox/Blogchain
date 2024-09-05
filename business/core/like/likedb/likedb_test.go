@@ -47,7 +47,7 @@ func TestStore(t *testing.T) {
 		newLike := like.Like{
 			ID:         likeID,
 			UserID:     primitive.NewObjectID(),
-			PostID:     primitive.NewObjectID(),
+			PostID:     1,
 			IsPositive: true,
 		}
 
@@ -67,13 +67,13 @@ func TestStore(t *testing.T) {
 		like1 := like.Like{
 			ID:         primitive.NewObjectID(),
 			UserID:     userID,
-			PostID:     primitive.NewObjectID(),
+			PostID:     1,
 			IsPositive: true,
 		}
 		like2 := like.Like{
 			ID:         primitive.NewObjectID(),
 			UserID:     userID,
-			PostID:     primitive.NewObjectID(),
+			PostID:     1,
 			IsPositive: false,
 		}
 
@@ -90,17 +90,17 @@ func TestStore(t *testing.T) {
 	})
 
 	t.Run("QueryAllByPostID", func(t *testing.T) {
-		postID := primitive.NewObjectID()
+
 		like1 := like.Like{
 			ID:         primitive.NewObjectID(),
 			UserID:     primitive.NewObjectID(),
-			PostID:     postID,
+			PostID:     1,
 			IsPositive: true,
 		}
 		like2 := like.Like{
 			ID:         primitive.NewObjectID(),
 			UserID:     primitive.NewObjectID(),
-			PostID:     postID,
+			PostID:     1,
 			IsPositive: false,
 		}
 
@@ -111,11 +111,11 @@ func TestStore(t *testing.T) {
 		require.NoError(t, err)
 
 		// Test QueryAllByPostID
-		likes, err := store.QueryAllByPostID(ctx, postID.Hex())
+		likes, err := store.QueryAllByPostID(ctx, like1.ID.String())
 		require.NoError(t, err)
 		assert.Len(t, likes, 2)
-		assert.Equal(t, postID, likes[0].PostID)
-		assert.Equal(t, postID, likes[1].PostID)
+		assert.Equal(t, like1.PostID, likes[0].PostID)
+		assert.Equal(t, like1.PostID, likes[1].PostID)
 	})
 
 	t.Run("Update and DeleteByID", func(t *testing.T) {
@@ -123,7 +123,7 @@ func TestStore(t *testing.T) {
 		initialLike := like.Like{
 			ID:         likeID,
 			UserID:     primitive.NewObjectID(),
-			PostID:     primitive.NewObjectID(),
+			PostID:     1,
 			IsPositive: true,
 		}
 
