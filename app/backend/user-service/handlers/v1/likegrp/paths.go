@@ -11,4 +11,4 @@ const PostPath = version + basePath
 
 const PutPath = version + basePath
 
-const DeletePath = version + basePath + "{id}"
+const DeletePath = version + basePath + "/" + "{id}"

@@ -2,6 +2,7 @@ package likedb
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/St3plox/Blogchain/business/core/like"
 	"github.com/rs/zerolog"
@@ -123,7 +124,15 @@ func (s *Store) DeleteByID(ctx context.Context, likeID string) error {
 // QueryAllByPostID retrieves all Like documents for a specific post.
 func (s *Store) QueryAllByPostID(ctx context.Context, postID string) ([]like.Like, error) {
 
-	cursor, err := s.collection.Find(ctx, bson.M{"post_id": postID})
+	postIDInt64, err := strconv.ParseInt(postID, 10, 64) 
+	if err != nil {
+		s.log.Error().Err(err).Msg("Invalid Post ID format")
+		//TODO: replace with universal error
+		return nil, ErrInvalidUserIDFormat
+	}
+
+
+	cursor, err := s.collection.Find(ctx, bson.M{"post_id": postIDInt64})
 	if err != nil {
 		s.log.Error().Err(err).Msg("Failed to query Likes by Post ID")
 		return nil, err
