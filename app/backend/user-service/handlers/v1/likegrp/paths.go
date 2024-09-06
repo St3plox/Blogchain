@@ -1,14 +1,15 @@
 package likegrp
 
-const version = "/v1"
+import v1 "github.com/St3plox/Blogchain/app/backend/user-service/handlers/v1"
+
 const basePath = "/like"
 
-const GetPath = version + basePath + "/" + "{id}"
+const GetPath = v1.Version + basePath + "/" + "{id}"
 
-const GetByUserOrPostIDPath = version + basePath
+const GetByUserOrPostIDPath = v1.Version + basePath
 
-const PostPath = version + basePath
+const PostPath = v1.Version + basePath
 
-const PutPath = version + basePath
+const PutPath = v1.Version + basePath
 
-const DeletePath = version + basePath + "/" + "{id}"
+const DeletePath = v1.Version + basePath + "/" + "{id}"

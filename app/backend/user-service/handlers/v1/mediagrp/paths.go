@@ -1,13 +1,17 @@
 package mediagrp
 
-const PostPath = "/v1/media"
+import v1 "github.com/St3plox/Blogchain/app/backend/user-service/handlers/v1"
 
-const PostMultiple = "/v1/media/many"
+const BasePath = "/media"
 
-const GetPath = "/v1/media/{" + MediaID + "}"
+const PostPath = v1.Version + BasePath
 
-const GetByIDsPath = "/v1/media"
+const PostMultiple = v1.Version + BasePath + "/many"
 
-const DeletePath = "/v1/media/{" + MediaID + "}"
+const GetPath = v1.Version + BasePath + "/{" + MediaID + "}"
+
+const GetByIDsPath = v1.Version + BasePath
+
+const DeletePath = v1.Version + BasePath + "/{" + MediaID + "}"
 
 const MediaID = "mediaID"

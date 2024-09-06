@@ -1,13 +1,17 @@
 package postgrp
 
-const PostPath = "/v1/posts"
+import v1 "github.com/St3plox/Blogchain/app/backend/user-service/handlers/v1"
 
-const GetUserPostsPath = "/v1/posts"
+const BasePath = "/posts"
 
-const GetAllPath = "/v1/posts/all"
+const PostPath = v1.Version + BasePath
 
-const GetPostsByUserAddressPath = "/v1/posts/{address}"
+const GetUserPostsPath = v1.Version + BasePath
 
-const GetByIdPath = "/v1/posts/id/{id}"
+const GetAllPath = v1.Version + BasePath + "/all"
 
-const GetPostsByUserAddressAndIndexPath = "/v1/posts/{address}/{index}"
+const GetPostsByUserAddressPath = v1.Version + BasePath + "/{address}"
+
+const GetByIdPath = v1.Version + BasePath + "/id/{id}"
+
+const GetPostsByUserAddressAndIndexPath = v1.Version + BasePath + "/{address}/{index}"
