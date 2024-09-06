@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-// MockCacheStore mocks the CacheStorer interface.
+// MockCacheStore mocks the CacheStorer interface for testing purposes.
 type MockCacheStore struct {
 	mock.Mock
 }

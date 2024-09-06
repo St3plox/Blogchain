@@ -2,6 +2,17 @@ basePath: /
 definitions:
   big.Int:
     type: object
+  github_com_St3plox_Blogchain_business_core_like.Like:
+    properties:
+      id:
+        type: string
+      is_positive:
+        type: boolean
+      post_id:
+        type: integer
+      user_id:
+        type: string
+    type: object
   github_com_St3plox_Blogchain_business_core_media.Media:
     properties:
       fileBytes:
@@ -541,6 +552,160 @@ paths:
       summary: Register a new user
       tags:
       - users
+  /v1/like:
+    get:
+      description: Retrieve likes by either user ID or post ID
+      parameters:
+      - description: User ID
+        in: query
+        name: user_id
+        type: string
+      - description: Post ID
+        in: query
+        name: post_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_St3plox_Blogchain_business_core_like.Like'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse'
+      summary: Get likes by user ID or post ID
+      tags:
+      - likes
+    post:
+      consumes:
+      - application/json
+      description: Create a new like
+      parameters:
+      - description: Like object
+        in: body
+        name: like
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_St3plox_Blogchain_business_core_like.Like'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/github_com_St3plox_Blogchain_business_core_like.Like'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse'
+      summary: Create a like
+      tags:
+      - likes
+  /v1/like/{id}:
+    delete:
+      description: Delete a like by its ID
+      parameters:
+      - description: Like ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse'
+      summary: Delete a like
+      tags:
+      - likes
+    get:
+      description: Retrieve a like by its ID
+      parameters:
+      - description: Like ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_St3plox_Blogchain_business_core_like.Like'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse'
+      summary: Get a like
+      tags:
+      - likes
+    put:
+      consumes:
+      - application/json
+      description: Update an existing like by its ID
+      parameters:
+      - description: Like ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated like object
+        in: body
+        name: like
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_St3plox_Blogchain_business_core_like.Like'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_St3plox_Blogchain_business_core_like.Like'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_St3plox_Blogchain_business_web_v1.ErrorResponse'
+      summary: Update a like
+      tags:
+      - likes
 securityDefinitions:
   jwtToken:
     in: header
