@@ -31,6 +31,7 @@ services:
     container_name: backend
     ports:
       - "3000:3000"
+      - "4000:4000"
     environment:
       - DB_URI=mongodb://mongodb:27017
       - HARDHAT_NODE_URL=http://hardhat-node:8545
