@@ -41,7 +41,7 @@ func New(postCore *post.Core, auth *auth.Auth, userCore *user.Core, mediaCore *m
 // @Param newPost body post.NewPost true "New Post"
 // @Success 201 {object} post.Post
 // @Failure 400 {object} v1.ErrorResponse
-// @Router /posts [post]
+// @Router /v1/posts [post]
 func (h *Handler) Post(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 
 	var np post.NewPost
@@ -76,7 +76,7 @@ func (h *Handler) Post(ctx context.Context, w http.ResponseWriter, r *http.Reque
 // @Param pageSize query int false "Page size" default(100)
 // @Success 200 {array} post.Post
 // @Failure 400 {object} v1.ErrorResponse
-// @Router /posts [get]
+// @Router /v1/posts [get]
 func (h *Handler) GetUserPosts(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 	claims := auth.GetClaims(ctx)
 
@@ -115,7 +115,7 @@ func (h *Handler) GetUserPosts(ctx context.Context, w http.ResponseWriter, r *ht
 // @Param pageSize query int false "Page size" default(100)
 // @Success 200 {array} post.Post
 // @Failure 400 {object} v1.ErrorResponse
-// @Router /posts/{address} [get]
+// @Router /v1/posts/{address} [get]
 func (h *Handler) GetPostsByUserAddress(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 	params := mux.Vars(r)
 
@@ -149,7 +149,7 @@ func (h *Handler) GetPostsByUserAddress(ctx context.Context, w http.ResponseWrit
 // @Success 200 {object} post.Post
 // @Failure 400 {object} v1.ErrorResponse
 // @Failure 404 {object} v1.ErrorResponse
-// @Router /posts/{address}/{index} [get]
+// @Router /v1/posts/{address}/{index} [get]
 func (h *Handler) GetPostsByUserAddressAndIndex(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 	params := mux.Vars(r)
 
@@ -182,7 +182,7 @@ func (h *Handler) GetPostsByUserAddressAndIndex(ctx context.Context, w http.Resp
 // @Success 200 {object} post.Post
 // @Failure 400 {object} v1.ErrorResponse
 // @Failure 404 {object} v1.ErrorResponse
-// @Router /posts/id/{id} [get]
+// @Router /v1/posts/id/{id} [get]
 func (h *Handler) GetById(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 	params := mux.Vars(r)
 
@@ -212,7 +212,7 @@ func (h *Handler) GetById(ctx context.Context, w http.ResponseWriter, r *http.Re
 // @Success 200 {array} post.Post
 // @Failure 400 {object} v1.ErrorResponse
 // @Failure 404 {object} v1.ErrorResponse
-// @Router /posts/all [get]
+// @Router /v1/posts/all [get]
 func (h *Handler) GetAll(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 	page, pageSize, err := extractPaginationParams(r)
 	if err != nil {

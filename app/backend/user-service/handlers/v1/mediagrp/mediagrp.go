@@ -32,7 +32,7 @@ func New(media *media.Core) *Handler {
 // @Success 201 {object} media.MediaData
 // @Failure 400 {object} v1.ErrorResponse
 // @Failure 500 {object} v1.ErrorResponse
-// @Router /media [post]
+// @Router /v1/media [post]
 func (h *Handler) Post(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 
 	newMedia, err := h.media.ParseMedia(r)
@@ -63,7 +63,7 @@ func (h *Handler) Post(ctx context.Context, w http.ResponseWriter, r *http.Reque
 // @Success 201 {object} []media.MediaData	
 // @Failure 400 {object} v1.ErrorResponse
 // @Failure 500 {object} v1.ErrorResponse
-// @Router /media/many [post]
+// @Router /v1/media/many [post]
 func (h *Handler) PostMultiple(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 
 	newMedia, err := h.media.ParseMultipleMedia(r)
@@ -93,7 +93,7 @@ func (h *Handler) PostMultiple(ctx context.Context, w http.ResponseWriter, r *ht
 // @Success 200 {object} media.Media
 // @Failure 404 {object} v1.ErrorResponse
 // @Failure 500 {object} v1.ErrorResponse
-// @Router /media/{media_id} [get]
+// @Router /v1/media/{media_id} [get]
 func (h *Handler) Get(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 	params := mux.Vars(r)
 
@@ -116,7 +116,7 @@ func (h *Handler) Get(ctx context.Context, w http.ResponseWriter, r *http.Reques
 // @Success 204
 // @Failure 404 {object} v1.ErrorResponse
 // @Failure 500 {object} v1.ErrorResponse
-// @Router /media/{media_id} [delete]
+// @Router /v1/media/{media_id} [delete]
 func (h *Handler) Delete(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 	params := mux.Vars(r)
 
@@ -141,7 +141,7 @@ func (h *Handler) Delete(ctx context.Context, w http.ResponseWriter, r *http.Req
 // @Success 200 {array} media.Media
 // @Failure 400 {object} v1.ErrorResponse
 // @Failure 500 {object} v1.ErrorResponse
-// @Router /media [get]
+// @Router /v1/media [get]
 func (h *Handler) GetByIDs(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 	var mediaIDs []string
 	if err := json.NewDecoder(r.Body).Decode(&mediaIDs); err != nil {
