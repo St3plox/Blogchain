@@ -120,7 +120,7 @@ Frontend can be accessed on port 8080, backend - 3000
 - [X] Documentation
 - [X] Media support (backend)
 - [X] Testing (very basic except app layer)
-- [ ] Recommendation engine
+- [ ] Notification service
 - [ ] CI/CD (or smth like this)
 - [ ] Improved UI/UX (no way)
 
