@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -8,6 +10,10 @@ import (
 	"runtime"
 	"time"
 
+	gomail "gopkg.in/mail.v2"
+
+	"github.com/St3plox/Blogchain/business/core/email"
+	"github.com/St3plox/Blogchain/business/web/kafka/consumer"
 	"github.com/St3plox/Blogchain/foundation/logger"
 	"github.com/ardanlabs/conf/v3"
 	"github.com/rs/zerolog"
@@ -52,6 +58,13 @@ func run(log *zerolog.Logger) error {
 			AdminKey   string `json:"admin_key"`
 			AdminEmail string `json:"admin_email"`
 		}
+		LikeConsumer struct {
+			RetryDelay time.Duration `conf:"default:5s"`
+			Topic      string        `conf:"default:likes"`
+			Address    string        `conf:"default:localhost:9092"`
+			Group      string        `conf:"default:blogchain-group"`
+			BufferSize int           `conf:"default:8"`
+		}
 	}{
 		Version: conf.Version{
 			Build: build,
@@ -81,7 +94,6 @@ func run(log *zerolog.Logger) error {
 		return fmt.Errorf("parsing config: %w", err)
 	}
 
-
 	// -------------------------------------------------------------------------
 	// App Starting
 
@@ -93,7 +105,61 @@ func run(log *zerolog.Logger) error {
 		return fmt.Errorf("generating config for output: %w", err)
 	}
 	log.Info().Str("config", out).Msg("startup")
-	
 
-	return nil
+	// -------------------------------------------------------------------------
+	// inititalzing notifications support
+
+	d := gomail.NewDialer("smtp.gmail.com", 587, cfg.Email.AdminEmail, cfg.Email.AdminKey)
+
+	// This is only needed when SSL/TLS certificate is not valid on server.
+	// In production this should be set to false.
+	d.TLSConfig = &tls.Config{InsecureSkipVerify: true}
+
+	emailCore := email.NewCore(cfg.Email.AdminEmail, d)
+
+	// -------------------------------------------------------------------------
+	// inititalzing consumer support
+
+	likeConsumer, err := consumer.NewLikeConsumer(
+		cfg.LikeConsumer.Address,
+		cfg.LikeConsumer.Group,
+		cfg.LikeConsumer.Topic,
+		log,
+		runtime.GOMAXPROCS(0),
+		time.Microsecond*10,
+	)
+
+	likeController := consumer.New(likeConsumer, time.Second, log, emailCore)
+
+	serverErrors := make(chan error, 1)
+	go func() {
+		log.Info().
+			Str("status", "notification service started").
+			Msg("startup")
+		serverErrors <- likeController.ListenForEvents(context.Background())
+	}()
+
+	// -------------------------------------------------------------------------
+	// Shutdown
+
+	select {
+	case err := <-serverErrors:
+		return fmt.Errorf("server error: %w", err)
+
+		// case sig := <-shutdown:
+		// 	log.Info().
+		// 		Str("status", "shutdown started").
+		// 		Str("signal", sig.String()).
+		// 		Msg("shutdown")
+		// 	defer log.Info().Str("status", "shutdown complete").
+		// 		Str("signal", sig.String()).
+		// 		Msg("shutdown")
+
+		// 	ctx, cancel := context.WithTimeout(context.Background(), cfg.Web.ShutdownTimeout)
+		// 	defer cancel()
+
+
+	}
+
+	// return nil
 }

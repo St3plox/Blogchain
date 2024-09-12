@@ -12,6 +12,10 @@ import (
 
 var topic = "likes"
 
+type Producer interface {
+	ProduceLikesEvents(likesEvents []like.LikeEvent) error
+}
+
 type LikeProducer struct {
 	producer *kafka.Producer
 }
@@ -21,7 +25,7 @@ func NewLikeProducer(producer *kafka.Producer) *LikeProducer {
 
 }
 
-func ProduceLikesEvents(producer *kafka.Producer, likesEvents []like.Like) error {
+func (lp *LikeProducer) ProduceLikesEvents(likesEvents []like.LikeEvent) error {
 	for _, likeEvent := range likesEvents {
 		encodedEvent, err := json.Marshal(likeEvent)
 		if err != nil {
@@ -32,7 +36,7 @@ func ProduceLikesEvents(producer *kafka.Producer, likesEvents []like.Like) error
 			TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
 			Value:          encodedEvent,
 		}
-		if err := producer.Produce(message, nil); err != nil {
+		if err := lp.producer.Produce(message, nil); err != nil {
 			return err
 		}
 	}

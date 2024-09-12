@@ -19,9 +19,10 @@ type Storer interface {
 }
 
 type Core struct {
-	cache    cachestore.CacheStore
-	storer   Storer
-	userSore user.Storer
+	cache        cachestore.CacheStore
+	storer       Storer
+	userSore     user.Storer
+	likeProducer producer.Producer
 }
 
 func NewCore(cache cachestore.CacheStore, storer Storer, userStore user.Storer) *Core {
@@ -51,6 +52,11 @@ func (c *Core) Create(ctx context.Context, newLike Like) (Like, error) {
 	if err := c.cache.Set(ctx, savedLike); err != nil {
 		return Like{}, fmt.Errorf("error caching like: %w", err)
 	}
+
+
+	likeEvent := LikeEvent{Like: savedLike, UserEmail: user.Email}
+
+	c.likeProducer.ProduceLikesEvents([]LikeEvent{likeEvent})
 
 	return savedLike, nil
 }

@@ -33,13 +33,13 @@ func New(consumer likeConsumer, delay time.Duration, log *zerolog.Logger, emailS
 }
 
 // ListenForEvents listens to like events from Kafka and sends emails for each event
-func (c *Controller) ListenForEvents(ctx context.Context) {
+func (c *Controller) ListenForEvents(ctx context.Context) error{
 	for {
 		// Consume events from the Kafka consumer
 		likeEventChannel, err := c.consumer.Consume(ctx)
 		if err != nil {
 			c.log.Error().Err(err).Msg("Failed to start consuming events")
-			return
+			return err
 		}
 
 		for likeEvent := range likeEventChannel {
