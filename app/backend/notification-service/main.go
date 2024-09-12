@@ -81,5 +81,19 @@ func run(log *zerolog.Logger) error {
 		return fmt.Errorf("parsing config: %w", err)
 	}
 
+
+	// -------------------------------------------------------------------------
+	// App Starting
+
+	log.Info().Str("version", build).Msg("starting service")
+	defer log.Info().Msg("shutdown complete")
+
+	out, err := conf.String(&cfg)
+	if err != nil {
+		return fmt.Errorf("generating config for output: %w", err)
+	}
+	log.Info().Str("config", out).Msg("startup")
+	
+
 	return nil
 }
