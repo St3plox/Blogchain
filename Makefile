@@ -31,6 +31,9 @@ gen-docs:
 run-local:
 	go run app/backend/user-service/main.go
 
+run-not-local:
+	go run app/backend/notification-service/main.go
+
 build-image-service:
 	docker build -t $(BACKEND_IMAGE) -f zarf/docker/Dockerfile .
 

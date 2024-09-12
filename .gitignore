@@ -10,3 +10,5 @@ artifacts
 keys
 
 /contracts/cfg/*
+
+config.json
