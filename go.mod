@@ -4,6 +4,7 @@ go 1.22.4
 
 require (
 	github.com/ardanlabs/conf/v3 v3.1.7
+	github.com/confluentinc/confluent-kafka-go v1.9.2
 	github.com/ethereum/go-ethereum v1.14.7
 	github.com/go-playground/locales v0.14.1
 	github.com/go-playground/universal-translator v0.18.1

@@ -81,8 +81,5 @@ func run(log *zerolog.Logger) error {
 		return fmt.Errorf("parsing config: %w", err)
 	}
 
-	fmt.Println(cfg)
-
 	return nil
-
 }

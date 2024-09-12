@@ -41,6 +41,20 @@ services:
       - hardhat-node
       - redis
     restart: unless-stopped
+  
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.0.1
+    environment:
+      - ZOOKEEPER_CLIENT_PORT=2181
+  kafka:
+    image: confluentinc/cp-kafka:7.0.1
+    environment:
+      - KAFKA_ADVERTISED_HOST_NAME=kafka
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_CREATE_TOPICS=testtopic:1:1
+    depends_on:
+      - zookeeper
+    restart: on-failure
 
   frontend:
     build:
@@ -48,7 +62,7 @@ services:
       dockerfile: Dockerfile
     container_name: blogchain-vue
     ports:
-      - "8080:80"  
+      - "8080:80"
     environment:
       - VUE_APP_BACKEND_URL=http://backend:3000
     restart: unless-stopped
