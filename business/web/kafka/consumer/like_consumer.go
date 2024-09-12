@@ -48,14 +48,14 @@ func NewLikeConsumer(adrr, groupID, topic string, log *zerolog.Logger, bufferSiz
 
 // Consume starts ingesting from Kafka and returns a channel of rating events
 // representing the data consumed from topics
-func (lc *LikeConsumer) Consume(ctx context.Context) (<-chan like.Like, error) {
+func (lc *LikeConsumer) Consume(ctx context.Context) (<-chan like.LikeEvent, error) {
 
 	if err := lc.consumer.SubscribeTopics([]string{lc.topic}, nil); err != nil {
 		return nil, err
 	}
 
 	// Create a channel for emitting Like events
-	ch := make(chan like.Like, lc.channelBuffer)
+	ch := make(chan like.LikeEvent, lc.channelBuffer)
 	var wg sync.WaitGroup
 
 	wg.Add(1)
@@ -91,7 +91,7 @@ func (lc *LikeConsumer) Consume(ctx context.Context) (<-chan like.Like, error) {
 				retryDelay = lc.retryDelay
 
 				// Parse the Kafka message
-				var event like.Like
+				var event like.LikeEvent
 				if err := json.Unmarshal(msg.Value, &event); err != nil {
 					lc.log.Error().Err(err).Msg("Error unmarshalling Kafka message")
 					continue
@@ -107,7 +107,7 @@ func (lc *LikeConsumer) Consume(ctx context.Context) (<-chan like.Like, error) {
 			}
 		}
 	}()
-	
+
 	go func() {
 		<-ctx.Done() // Wait for cancellation
 		wg.Wait()    // Wait for the consumer goroutine to finish

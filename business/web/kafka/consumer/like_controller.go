@@ -11,7 +11,7 @@ import (
 
 // likeConsumer defines the interface for consuming Like events
 type likeConsumer interface {
-	Consume(ctx context.Context) (<-chan like.Like, error)
+	Consume(ctx context.Context) (<-chan like.LikeEvent, error)
 }
 
 // Controller defines the structure that manages event consumption and email sending
@@ -45,7 +45,7 @@ func (c *Controller) ListenForEvents(ctx context.Context) {
 		for likeEvent := range likeEventChannel {
 			c.log.Info().Msg("Started processing like event")
 
-			err := c.emailSender.Send(ctx, email.LikeToEmail(likeEvent)) 
+			err := c.emailSender.Send(ctx, email.LikeEventToEmail(likeEvent))
 			if err != nil {
 				c.log.Error().Err(err).Msg("Failed to send email after retries")
 				continue
