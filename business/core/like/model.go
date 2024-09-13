@@ -18,7 +18,6 @@ type NewLike struct {
 	IsPositive bool  `json:"is_positive"`
 }
 
-
 func (l Like) CacheKey() string {
 	return IdToCacheKey(l.ID.Hex())
 }

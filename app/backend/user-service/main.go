@@ -20,7 +20,7 @@ import (
 	"github.com/St3plox/Blogchain/business/core/post"
 	"github.com/St3plox/Blogchain/business/core/user"
 	"github.com/St3plox/Blogchain/business/core/user/userdb"
-	"github.com/confluentinc/confluent-kafka-go/kafka"
+	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	"github.com/redis/go-redis/v9"
 	httpSwagger "github.com/swaggo/http-swagger"
 
@@ -109,6 +109,10 @@ func run(log *zerolog.Logger) error {
 		}
 		Media struct {
 			MaxFileSizeMb string `conf:"default:10"`
+		}
+		Kafka struct {
+			Address string `conf:"default:localhost"`
+			Port    string `conf:"default:9092"`
 		}
 		ETH struct {
 			Rawurl   string `conf:"default:http://127.0.0.1:8545"`
@@ -246,7 +250,16 @@ func run(log *zerolog.Logger) error {
 	// -------------------------------------------------------------------------
 	//apache kafka support
 
-	prod, err := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": "localhost"})
+	kafkaAdress := os.Getenv("KAFKA_ADDRESS")
+	if kafkaAdress == "" {
+		kafkaAdress = cfg.Kafka.Address
+	}
+
+	kafkaUrl := kafkaAdress + ":" + cfg.Kafka.Port
+
+	println(kafkaUrl)
+
+	prod, err := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": kafkaUrl})
 	if err != nil {
 		return err
 	}

@@ -120,8 +120,15 @@ func run(log *zerolog.Logger) error {
 	// -------------------------------------------------------------------------
 	// initializing consumer support
 
+
+	kafkaAdress := os.Getenv("KAFKA_ADDRESS")
+	if kafkaAdress == "" {
+		kafkaAdress = cfg.LikeConsumer.Address
+	}
+
+
 	likeConsumer, err := consumer.NewLikeConsumer(
-		cfg.LikeConsumer.Address,
+		kafkaAdress,
 		cfg.LikeConsumer.Group,
 		cfg.LikeConsumer.Topic,
 		log,
