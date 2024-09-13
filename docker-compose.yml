@@ -45,11 +45,11 @@ services:
       - zookeeper
     restart: on-failure
 
-  backend:
+  user-service:
     build:
       context: .
-      dockerfile: zarf/docker/Dockerfile
-    container_name: backend
+      dockerfile: zarf/docker/user-service/Dockerfile
+    container_name: user-service
     ports:
       - "3000:3000"
       - "4000:4000"
@@ -87,5 +87,5 @@ services:
     ports:
       - "8080:80"
     environment:
-      - VUE_APP_BACKEND_URL=http://backend:3000
+      - VUE_APP_BACKEND_URL=http://user-service:3000
     restart: unless-stopped
