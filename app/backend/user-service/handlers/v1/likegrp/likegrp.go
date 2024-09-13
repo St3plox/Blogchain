@@ -105,10 +105,6 @@ func (h *Handler) Create(ctx context.Context, w http.ResponseWriter, r *http.Req
 		return v1.NewRequestError(err, http.StatusBadRequest)
 	}
 
-	fmt.Println("!!!!!!!!!!!!!!!!!!!!!! ")
-	fmt.Println(newLike)
-	fmt.Println("!!!!!!!!!!!!!!!!!!!!!! ")
-
 	createdLike, err := h.like.Create(ctx, newLike)
 	if err != nil {
 		return v1.NewRequestError(fmt.Errorf("core error: %w", err), http.StatusInternalServerError)
@@ -136,7 +132,7 @@ func (h *Handler) Update(ctx context.Context, w http.ResponseWriter, r *http.Req
 	if err := web.Decode(r, &updatedLike); err != nil {
 		return v1.NewRequestError(err, http.StatusBadRequest)
 	}
-	
+
 	like, err := h.like.Update(ctx, updatedLike)
 	if err != nil {
 		if likedb.IsLikeNotFound(err) {
