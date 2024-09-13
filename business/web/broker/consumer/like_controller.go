@@ -4,14 +4,14 @@ import (
 	"context"
 	"time"
 
-	"github.com/St3plox/Blogchain/business/core/email"
-	"github.com/St3plox/Blogchain/business/core/like"
+	"github.com/St3plox/Blogchain/business/core/email"   
+	"github.com/St3plox/Blogchain/business/web/broker"
 	"github.com/rs/zerolog"
 )
 
 // likeConsumer defines the interface for consuming Like events
 type likeConsumer interface {
-	Consume(ctx context.Context) (<-chan like.LikeEvent, error)
+	Consume(ctx context.Context) (<-chan broker.LikeEvent, error)
 }
 
 // Controller defines the structure that manages event consumption and email sending

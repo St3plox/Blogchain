@@ -6,6 +6,8 @@ import (
 
 	"github.com/St3plox/Blogchain/business/core/user"
 	"github.com/St3plox/Blogchain/business/web/auth"
+	"github.com/St3plox/Blogchain/business/web/broker"
+	"github.com/St3plox/Blogchain/business/web/broker/producer"
 	"github.com/St3plox/Blogchain/foundation/cachestore"
 )
 
@@ -25,11 +27,12 @@ type Core struct {
 	likeProducer producer.Producer
 }
 
-func NewCore(cache cachestore.CacheStore, storer Storer, userStore user.Storer) *Core {
+func NewCore(cache cachestore.CacheStore, storer Storer, userStore user.Storer, likeProducer producer.Producer) *Core {
 	return &Core{
-		cache:    cache,
-		storer:   storer,
-		userSore: userStore,
+		cache:        cache,
+		storer:       storer,
+		userSore:     userStore,
+		likeProducer: likeProducer,
 	}
 }
 
@@ -53,10 +56,14 @@ func (c *Core) Create(ctx context.Context, newLike Like) (Like, error) {
 		return Like{}, fmt.Errorf("error caching like: %w", err)
 	}
 
+	likeEvent := broker.LikeEvent{
+		UserID:     savedLike.UserID.Hex(),
+		PostID:     savedLike.PostID,
+		IsPositive: savedLike.IsPositive,
+		UserEmail:  user.Email,
+	}
 
-	likeEvent := LikeEvent{Like: savedLike, UserEmail: user.Email}
-
-	c.likeProducer.ProduceLikesEvents([]LikeEvent{likeEvent})
+	c.likeProducer.ProduceLikesEvents([]broker.LikeEvent{likeEvent})
 
 	return savedLike, nil
 }

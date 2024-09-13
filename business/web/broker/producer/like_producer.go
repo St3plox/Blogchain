@@ -6,14 +6,14 @@ package producer
 import (
 	"encoding/json"
 
-	"github.com/St3plox/Blogchain/business/core/like"
+	"github.com/St3plox/Blogchain/business/web/broker"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 )
 
 var topic = "likes"
 
 type Producer interface {
-	ProduceLikesEvents(likesEvents []like.LikeEvent) error
+	ProduceLikesEvents(likesEvents []broker.LikeEvent) error
 }
 
 type LikeProducer struct {
@@ -25,7 +25,7 @@ func NewLikeProducer(producer *kafka.Producer) *LikeProducer {
 
 }
 
-func (lp *LikeProducer) ProduceLikesEvents(likesEvents []like.LikeEvent) error {
+func (lp *LikeProducer) ProduceLikesEvents(likesEvents []broker.LikeEvent) error {
 	for _, likeEvent := range likesEvents {
 		encodedEvent, err := json.Marshal(likeEvent)
 		if err != nil {

@@ -3,7 +3,7 @@ package email
 import (
 	"fmt"
 
-	"github.com/St3plox/Blogchain/business/core/like"
+	"github.com/St3plox/Blogchain/business/web/broker"
 )
 
 type Email struct {
@@ -12,7 +12,7 @@ type Email struct {
 	Body      string
 }
 
-func LikeEventToEmail(like like.LikeEvent) Email {
+func LikeEventToEmail(like broker.LikeEvent) Email {
 
 	likeStr := ""
 	if like.IsPositive {
@@ -24,7 +24,7 @@ func LikeEventToEmail(like like.LikeEvent) Email {
 	subject := fmt.Sprintf("New %s on your post", likeStr)
 	text := fmt.Sprintf(
 		"The user %s left %s under post with id: %d",
-		like.UserID.Hex(),
+		like.UserID,
 		likeStr,
 		like.PostID,
 	)

@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/St3plox/Blogchain/business/core/like"
+	"github.com/St3plox/Blogchain/business/web/broker"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/rs/zerolog"
 )
@@ -48,14 +48,14 @@ func NewLikeConsumer(adrr, groupID, topic string, log *zerolog.Logger, bufferSiz
 
 // Consume starts ingesting from Kafka and returns a channel of rating events
 // representing the data consumed from topics
-func (lc *LikeConsumer) Consume(ctx context.Context) (<-chan like.LikeEvent, error) {
+func (lc *LikeConsumer) Consume(ctx context.Context) (<-chan broker.LikeEvent, error) {
 
 	if err := lc.consumer.SubscribeTopics([]string{lc.topic}, nil); err != nil {
 		return nil, err
 	}
 
 	// Create a channel for emitting Like events
-	ch := make(chan like.LikeEvent, lc.channelBuffer)
+	ch := make(chan broker.LikeEvent, lc.channelBuffer)
 	var wg sync.WaitGroup
 
 	wg.Add(1)
@@ -74,14 +74,14 @@ func (lc *LikeConsumer) Consume(ctx context.Context) (<-chan like.LikeEvent, err
 
 			default:
 
-				msg, err := lc.consumer.ReadMessage(-1) 
+				msg, err := lc.consumer.ReadMessage(-1)
 				if err != nil {
 
 					// Log the error and retry after a backoff period
 					lc.log.Error().Err(err).Msg("Error reading message, retrying with backoff")
-					time.Sleep(retryDelay)          
-					retryDelay *= 2                
-					if retryDelay > 30*time.Second { 
+					time.Sleep(retryDelay)
+					retryDelay *= 2
+					if retryDelay > 30*time.Second {
 						retryDelay = 30 * time.Second
 					}
 					continue
@@ -91,7 +91,7 @@ func (lc *LikeConsumer) Consume(ctx context.Context) (<-chan like.LikeEvent, err
 				retryDelay = lc.retryDelay
 
 				// Parse the Kafka message
-				var event like.LikeEvent
+				var event broker.LikeEvent
 				if err := json.Unmarshal(msg.Value, &event); err != nil {
 					lc.log.Error().Err(err).Msg("Error unmarshalling Kafka message")
 					continue

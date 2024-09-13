@@ -18,11 +18,6 @@ type NewLike struct {
 	IsPositive bool  `json:"is_positive"`
 }
 
-// LikeEvent struct is used send events to Notification service
-type LikeEvent struct {
-	Like
-	UserEmail string `json:"user_email"`
-}
 
 func (l Like) CacheKey() string {
 	return IdToCacheKey(l.ID.Hex())

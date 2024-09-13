@@ -13,7 +13,7 @@ import (
 	gomail "gopkg.in/mail.v2"
 
 	"github.com/St3plox/Blogchain/business/core/email"
-	"github.com/St3plox/Blogchain/business/web/kafka/consumer"
+	"github.com/St3plox/Blogchain/business/web/broker/consumer"
 	"github.com/St3plox/Blogchain/foundation/logger"
 	"github.com/ardanlabs/conf/v3"
 	"github.com/rs/zerolog"
@@ -107,7 +107,7 @@ func run(log *zerolog.Logger) error {
 	log.Info().Str("config", out).Msg("startup")
 
 	// -------------------------------------------------------------------------
-	// inititalzing notifications support
+	// initializing notifications support
 
 	d := gomail.NewDialer("smtp.gmail.com", 587, cfg.Email.AdminEmail, cfg.Email.AdminKey)
 
@@ -118,7 +118,7 @@ func run(log *zerolog.Logger) error {
 	emailCore := email.NewCore(cfg.Email.AdminEmail, d)
 
 	// -------------------------------------------------------------------------
-	// inititalzing consumer support
+	// initializing consumer support
 
 	likeConsumer, err := consumer.NewLikeConsumer(
 		cfg.LikeConsumer.Address,
