@@ -22,7 +22,6 @@ type LikeProducer struct {
 
 func NewLikeProducer(producer *kafka.Producer) *LikeProducer {
 	return &LikeProducer{producer}
-
 }
 
 func (lp *LikeProducer) ProduceLikesEvents(likesEvents []broker.LikeEvent) error {

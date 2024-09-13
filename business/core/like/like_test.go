@@ -7,6 +7,7 @@ import (
 
 	"github.com/St3plox/Blogchain/business/core/like"
 	"github.com/St3plox/Blogchain/business/core/user"
+	"github.com/St3plox/Blogchain/business/web/broker"
 	"github.com/St3plox/Blogchain/foundation/cachestore"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -18,8 +19,13 @@ type MockStorer struct {
 	mock.Mock
 }
 
-type MockProducer interface {
+type MockProducer struct {
 	mock.Mock
+}
+
+func (m *MockProducer) ProduceLikesEvents(likesEvents []broker.LikeEvent) error {
+	args := m.Called(likesEvents)
+	return args.Error(0)
 }
 
 func (m *MockStorer) Create(ctx context.Context, newLike like.Like) (like.Like, error) {
@@ -58,8 +64,9 @@ func TestCore_Create(t *testing.T) {
 	mockCache := new(cachestore.MockCacheStore)
 	mockStorer := new(MockStorer)
 	mockUserStore := new(user.MockStorer)
+	mockProducer := new(MockProducer)
 
-	core := like.NewCore(mockCache, mockStorer, mockUserStore, nil)
+	core := like.NewCore(mockCache, mockStorer, mockUserStore, mockProducer)
 
 	// Mocked claims
 	userID := primitive.NewObjectID()
@@ -78,6 +85,7 @@ func TestCore_Create(t *testing.T) {
 	mockUserStore.On("QueryByID", ctx, mock.Anything).Return(mockUser, nil)
 	mockStorer.On("Create", ctx, mock.Anything).Return(expectedLike, nil)
 	mockCache.On("Set", ctx, mock.Anything).Return(nil)
+	mockProducer.On("ProduceLikesEvents", mock.Anything).Return(nil)
 
 	// Act
 	createdLike, err := core.Create(ctx, newLike)
@@ -88,6 +96,14 @@ func TestCore_Create(t *testing.T) {
 	mockUserStore.AssertCalled(t, "QueryByID", ctx, mock.Anything)
 	mockStorer.AssertCalled(t, "Create", ctx, mock.Anything)
 	mockCache.AssertCalled(t, "Set", ctx, expectedLike)
+	mockProducer.AssertCalled(t, "ProduceLikesEvents", []broker.LikeEvent{
+        {
+            UserID:     expectedLike.UserID.Hex(),
+            PostID:     expectedLike.PostID,
+            IsPositive: expectedLike.IsPositive,
+            UserEmail:  mockUser.Email,
+        },
+    })
 }
 func TestCore_QueryByID_CacheHit(t *testing.T) {
 	ctx := context.Background()
