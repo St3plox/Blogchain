@@ -13,8 +13,11 @@ RUN go mod download
 # Copy the source code into the container
 COPY . .
 
+# Change to the directory containing the main.go
+WORKDIR /app/backend/user-service
+
 # Build the Go app
-RUN CGO_ENABLED=0 GOOS=linux go build -o main ./app/backend/user-service
+RUN go build -o myapp -ldflags '-linkmode external -w -extldflags "-static"' ./app/backend/user-service
 
 # Start a new stage from Alpine
 FROM alpine:3.19
@@ -27,7 +30,7 @@ ENV EXPOSE_PORT=3000
 WORKDIR /app/backend/user-service
 
 # Copy the built executable from the previous stage
-COPY --from=build /app/backend/user-service/main .
+COPY --from=build /app/backend/user-service/myapp .
 
 # Copy the keys folder from the build context
 COPY zarf/keys ./zarf/keys
@@ -37,4 +40,4 @@ EXPOSE $EXPOSE_PORT
 EXPOSE 4000
 
 # Command to run the executable
-CMD ["./main"]
+CMD ["./myapp"]

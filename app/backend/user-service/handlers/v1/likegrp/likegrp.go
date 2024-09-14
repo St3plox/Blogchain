@@ -132,7 +132,7 @@ func (h *Handler) Update(ctx context.Context, w http.ResponseWriter, r *http.Req
 	if err := web.Decode(r, &updatedLike); err != nil {
 		return v1.NewRequestError(err, http.StatusBadRequest)
 	}
-	
+
 	like, err := h.like.Update(ctx, updatedLike)
 	if err != nil {
 		if likedb.IsLikeNotFound(err) {

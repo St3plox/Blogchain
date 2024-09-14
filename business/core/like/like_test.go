@@ -18,6 +18,10 @@ type MockStorer struct {
 	mock.Mock
 }
 
+type MockProducer interface {
+	mock.Mock
+}
+
 func (m *MockStorer) Create(ctx context.Context, newLike like.Like) (like.Like, error) {
 	args := m.Called(ctx, newLike)
 	return args.Get(0).(like.Like), args.Error(1)
@@ -55,7 +59,7 @@ func TestCore_Create(t *testing.T) {
 	mockStorer := new(MockStorer)
 	mockUserStore := new(user.MockStorer)
 
-	core := like.NewCore(mockCache, mockStorer, mockUserStore)
+	core := like.NewCore(mockCache, mockStorer, mockUserStore, nil)
 
 	// Mocked claims
 	userID := primitive.NewObjectID()
@@ -63,7 +67,7 @@ func TestCore_Create(t *testing.T) {
 		ID: userID,
 	}
 	newLike := like.Like{
-		PostID:		1,
+		PostID:     1,
 		IsPositive: true,
 	}
 	expectedLike := newLike
@@ -91,7 +95,7 @@ func TestCore_QueryByID_CacheHit(t *testing.T) {
 	mockCache := new(cachestore.MockCacheStore)
 	mockStorer := new(MockStorer)
 
-	core := like.NewCore(mockCache, mockStorer, nil)
+	core := like.NewCore(mockCache, mockStorer, nil, nil)
 
 	likeID := primitive.NewObjectID().Hex()
 	expectedLike := like.Like{
@@ -123,7 +127,7 @@ func TestCore_QueryByID_CacheMiss(t *testing.T) {
 	mockCache := new(cachestore.MockCacheStore)
 	mockStorer := new(MockStorer)
 
-	core := like.NewCore(mockCache, mockStorer, nil)
+	core := like.NewCore(mockCache, mockStorer, nil, nil)
 
 	likeID := primitive.NewObjectID().Hex()
 	expectedLike := like.Like{
@@ -155,7 +159,7 @@ func TestCore_Update(t *testing.T) {
 	mockCache := new(cachestore.MockCacheStore)
 	mockStorer := new(MockStorer)
 
-	core := like.NewCore(mockCache, mockStorer, nil)
+	core := like.NewCore(mockCache, mockStorer, nil, nil)
 
 	updatedLike := like.Like{
 		ID:         primitive.NewObjectID(),
@@ -184,7 +188,7 @@ func TestCore_DeleteByID(t *testing.T) {
 	mockCache := new(cachestore.MockCacheStore)
 	mockStorer := new(MockStorer)
 
-	core := like.NewCore(mockCache, mockStorer, nil)
+	core := like.NewCore(mockCache, mockStorer, nil, nil)
 
 	likeID := primitive.NewObjectID().Hex()
 

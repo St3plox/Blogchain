@@ -24,11 +24,32 @@ services:
       - "6379:6379"
     restart: unless-stopped
 
-  backend:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.0.1
+    environment:
+      - ZOOKEEPER_CLIENT_PORT=2181
+  kafka:
+    container_name: kafka
+    image: confluentinc/cp-kafka:7.0.1
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    restart: on-failure
+
+  user-service:
     build:
       context: .
-      dockerfile: zarf/docker/Dockerfile
-    container_name: backend
+      dockerfile: zarf/docker/user-service/Dockerfile
+    container_name: user-service
     ports:
       - "3000:3000"
       - "4000:4000"
@@ -36,10 +57,26 @@ services:
       - DB_URI=mongodb://mongodb:27017
       - HARDHAT_NODE_URL=http://hardhat-node:8545
       - REDIS_URL=redis://redis:6379
+      - KAFKA_ADDRESS=kafka
     depends_on:
       - mongodb
       - hardhat-node
       - redis
+      - zookeeper
+      - kafka
+    restart: unless-stopped
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: zarf/docker/notification-service/Dockerfile
+    container_name: notification-service
+    ports:
+      - "3001:3001"
+    environment:
+      - KAFKA_ADDRESS=kafka:9092
+    depends_on:
+      - kafka
     restart: unless-stopped
 
   frontend:
@@ -48,7 +85,7 @@ services:
       dockerfile: Dockerfile
     container_name: blogchain-vue
     ports:
-      - "8080:80"  
+      - "8080:80"
     environment:
-      - VUE_APP_BACKEND_URL=http://backend:3000
+      - VUE_APP_BACKEND_URL=http://user-service:3000
     restart: unless-stopped
