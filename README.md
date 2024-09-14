@@ -71,7 +71,7 @@ You can access api docs on http://localhost:4000/swagger/index.html
 * [![Golang][Golang]][Golang-url]
 * [![Vue.js][Vue.js]][Vue-url]
 * [![JavaScript][JavaScript]][JavaScript-url]
-  [![Apache-Kafka][Apache-Kafka]][Apache-Kafka-url]
+* [![Apache-Kafka][Apache-Kafka]][Apache-Kafka-url]
 * [![Solidity][Solidity]][Solidity-url]
 * [![MongoDB][MongoDB]][MongoDB-url]
 * [![Redis][Redis]][Redis-url]
@@ -84,6 +84,7 @@ You can access api docs on http://localhost:4000/swagger/index.html
 
 ### Service design
 ![Blogchain](./assets/Blogchain.png)
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- GETTING STARTED -->
 ## Getting Started
