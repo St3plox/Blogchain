@@ -32,7 +32,7 @@
         <li><a href="#built-with">Built With</a></li>
       </ul>
     </li>
-    <li> <a href="#app-design">Service design<a/></li>
+    <li> <a href="#service-design">Service design<a/></li>
     <li>
       <a href="#getting-started">Getting Started</a>
       <ul>
@@ -102,15 +102,29 @@ redis server, frontend and backend api.
    git clone https://github.com/St3plox/Blogchain.git
    cd Blogchain
    ```
-3. Generate private key that is used in auth
+2. Generate private key that is used in auth
    ```bash
    make gen-private
    ```
-4. build and run the app
+
+3. Generate notification service cfg
+   ```bash
+   touch app/backend/notification-service/config.json
+   nano app/backend/notification-service/config.json
+   ```
+4. Paste your email auth data. Be sure to generate api key in your account
+  {
+    "email": {
+        "admin_key": "your-secure-key",
+        "admin_email": "your-mail@gmail.com"
+    }
+  }
+
+5. Build and run the app (this might take a while)
    ```bash
    docker-compose up -d
    ```
-Frontend can be accessed on port 8080, backend - 3000
+Frontend can be accessed on port 8080, backend - 3000, swagger - 4000
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
