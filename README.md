@@ -32,6 +32,7 @@
         <li><a href="#built-with">Built With</a></li>
       </ul>
     </li>
+    <li> <a href="#app-design">Service design<a/></li>
     <li>
       <a href="#getting-started">Getting Started</a>
       <ul>
@@ -52,10 +53,10 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-This project was created mostly for learning purposes. The app itself represents a frontend and backend api that uses  mongodb and ethereum testnet for data storage. 
-When user creates an account the ethereum address will be generated and asociated with their account. All user data are stored in the db. However, posts are stored in ethereum blockchain. 
+This project was created mostly for learning purposes. The app itself represents a frontend and backend api that uses  mongodb and ethereum testnet for data storage. Backend app consists out of 2 apps that communicate asynchronously via apache kafka.
+When user creates an account the ethereum address will be generated and asociated with their account. All user data are stored in the db. However, posts are stored in ethereum blockchain. Also when somebody puts like on user's post the notification is send to their email.
 There is also an admin account that signs all the transactions and pays the gas fees.
-(In future I need to change it because it's unsafe, made it bacause it's simple as a prototype) Backend api uses jwt to authenticate users.
+(In future I need to change it because it's unsafe, made it because it's simple as a prototype) Backend api uses jwt to authenticate users.
 
 In the backend api I haven't used any frameworks, but I used gorilla/mux as a router and some kind of template for an app
 from the Ardanlabs course.
@@ -70,6 +71,7 @@ You can access api docs on http://localhost:4000/swagger/index.html
 * [![Golang][Golang]][Golang-url]
 * [![Vue.js][Vue.js]][Vue-url]
 * [![JavaScript][JavaScript]][JavaScript-url]
+  [![Apache-Kafka][Apache-Kafka]][Apache-Kafka-url]
 * [![Solidity][Solidity]][Solidity-url]
 * [![MongoDB][MongoDB]][MongoDB-url]
 * [![Redis][Redis]][Redis-url]
@@ -80,10 +82,12 @@ You can access api docs on http://localhost:4000/swagger/index.html
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
+### Service design
+![Blogchain](./assets/Blogchain.png)
 
 <!-- GETTING STARTED -->
 ## Getting Started
-The simplest way to get started is to use docker. Otherwise you will have to install Go 1.22, npm, hardhat, mongod, redis. Startup the mongodb server, than hardhat tesnet, 
+The simplest way to get started is to use docker. Otherwise you will have to install Go 1.22, npm, hardhat, mongod, redis. Startup the mongodb server, than hardhat testnet, 
 redis server, frontend and backend api.
 
 ### Prerequisites
@@ -170,8 +174,8 @@ Egor - st3pegor@gmail.com
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
 
-* [Ardan labs Github](https://github.com/ardanlabs)
-* [Boostrap Vue navbar](https://bootstrap-vue.org/docs/components/navbar)
+* [Ardanlabs Github](https://github.com/ardanlabs)
+* [Bootstrap Vue navbar](https://bootstrap-vue.org/docs/components/navbar)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -185,6 +189,8 @@ Egor - st3pegor@gmail.com
 [JavaScript-url]: https://www.javascript.com/
 [Solidity]: https://img.shields.io/badge/solidity-363636?style=for-the-badge&logo=solidity&logoColor=white
 [Solidity-url]: https://docs.soliditylang.org/
+[Apache-Kafka]: https://img.shields.io/badge/Apache_Kafka-231F20?style=for-the-badge&logo=apache-kafka&logoColor=white
+[Apache-Kafka-url]: https://kafka.apache.org/
 [MongoDB]: https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white
 [MongoDB-url]: https://www.mongodb.com/
 [Hardhat]: https://img.shields.io/badge/Hardhat-FFCF24?style=for-the-badge&logo=hardhat&logoColor=black
