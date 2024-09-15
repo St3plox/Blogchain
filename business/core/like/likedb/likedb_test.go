@@ -148,6 +148,50 @@ func TestStore(t *testing.T) {
 
 		// Verify deletion
 		_, err = store.QueryByID(ctx, likeID.Hex())
-		assert.True(t, likedb.IsLikeNotFound(err))
+		assert.True(t, like.IsLikeNotFound(err))
+	})
+
+	t.Run("QueryByUserAndPostID - Success", func(t *testing.T) {
+		// Create a like for testing
+		userID := primitive.NewObjectID()
+		postID := int64(1)
+		newLike := like.Like{
+			ID:         primitive.NewObjectID(),
+			UserID:     userID,
+			PostID:     postID,
+			IsPositive: true,
+		}
+
+		// Insert the like
+		insertedLike, err := store.Create(ctx, newLike)
+		require.NoError(t, err)
+
+		// Test QueryByUserAndPostID
+		resultLike, err := store.QueryByUserAndPostID(ctx, userID.Hex(), postID)
+		require.NoError(t, err)
+		assert.Equal(t, insertedLike.ID, resultLike.ID)
+		assert.Equal(t, insertedLike.UserID, resultLike.UserID)
+		assert.Equal(t, insertedLike.PostID, resultLike.PostID)
+		assert.Equal(t, insertedLike.IsPositive, resultLike.IsPositive)
+	})
+
+	t.Run("QueryByUserAndPostID - Invalid UserID", func(t *testing.T) {
+		// Test with an invalid user ID
+		invalidUserID := "invalidUserID"
+		postID := int64(1)
+
+		_, err := store.QueryByUserAndPostID(ctx, invalidUserID, postID)
+		assert.Error(t, err)
+		assert.True(t, like.IsInvalidUserIDFormat(err))
+	})
+
+	t.Run("QueryByUserAndPostID - Like Not Found", func(t *testing.T) {
+		// Test with a valid user ID but no corresponding like
+		userID := primitive.NewObjectID().Hex()
+		postID := int64(99) // A post ID that doesn't exist
+
+		_, err := store.QueryByUserAndPostID(ctx, userID, postID)
+		assert.Error(t, err)
+		assert.True(t, like.IsLikeNotFound(err))
 	})
 }

@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	"github.com/St3plox/Blogchain/business/core/like"
-	"github.com/St3plox/Blogchain/business/core/like/likedb"
 	v1 "github.com/St3plox/Blogchain/business/web/v1"
 	"github.com/St3plox/Blogchain/foundation/web"
 	"github.com/gorilla/mux"
@@ -44,7 +43,7 @@ func (h *Handler) Get(ctx context.Context, w http.ResponseWriter, r *http.Reques
 
 	foundLike, err := h.like.QueryByID(ctx, id)
 	if err != nil {
-		if likedb.IsLikeNotFound(err) {
+		if like.IsLikeNotFound(err) {
 			return v1.NewRequestError(fmt.Errorf("core error: %w", err), http.StatusNotFound)
 		}
 		return v1.NewRequestError(fmt.Errorf("core error: %w", err), http.StatusInternalServerError)
@@ -107,6 +106,9 @@ func (h *Handler) Create(ctx context.Context, w http.ResponseWriter, r *http.Req
 
 	createdLike, err := h.like.Create(ctx, newLike)
 	if err != nil {
+		if err == like.ErrLikeAlreadyExists {
+			return v1.NewRequestError(fmt.Errorf("core error: %w", err), http.StatusBadRequest)
+		}
 		return v1.NewRequestError(fmt.Errorf("core error: %w", err), http.StatusInternalServerError)
 	}
 
@@ -133,15 +135,15 @@ func (h *Handler) Update(ctx context.Context, w http.ResponseWriter, r *http.Req
 		return v1.NewRequestError(err, http.StatusBadRequest)
 	}
 
-	like, err := h.like.Update(ctx, updatedLike)
+	updatedLike, err := h.like.Update(ctx, updatedLike)
 	if err != nil {
-		if likedb.IsLikeNotFound(err) {
+		if like.IsLikeNotFound(err) {
 			return v1.NewRequestError(fmt.Errorf("core error: %w", err), http.StatusNotFound)
 		}
 		return v1.NewRequestError(fmt.Errorf("core error: %w", err), http.StatusInternalServerError)
 	}
 
-	return web.Respond(ctx, w, like, http.StatusOK)
+	return web.Respond(ctx, w, updatedLike, http.StatusOK)
 }
 
 // Delete handles deleting an existing like by ID.
@@ -163,7 +165,7 @@ func (h *Handler) Delete(ctx context.Context, w http.ResponseWriter, r *http.Req
 	}
 
 	if err := h.like.DeleteByID(ctx, id); err != nil {
-		if likedb.IsLikeNotFound(err) {
+		if like.IsLikeNotFound(err) {
 			return v1.NewRequestError(fmt.Errorf("core error: %w", err), http.StatusNotFound)
 		}
 		return v1.NewRequestError(fmt.Errorf("core error: %w", err), http.StatusInternalServerError)

@@ -1,4 +1,4 @@
-package likedb
+package like
 
 import (
 	"fmt"
@@ -13,6 +13,7 @@ var (
 	ErrLikeUpdateFailed      = fmt.Errorf("like update failed")
 	ErrLikeDeletionFailed    = fmt.Errorf("like deletion failed")
 	ErrInvalidUserIDFormat   = fmt.Errorf("invalid User ID format")
+	ErrLikeAlreadyExists 	 = fmt.Errorf("like already exist")
 )
 
 // IsInvalidIDFormat checks if an error is due to invalid ID format.

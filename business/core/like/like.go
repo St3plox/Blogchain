@@ -9,13 +9,15 @@ import (
 	"github.com/St3plox/Blogchain/business/web/broker"
 	"github.com/St3plox/Blogchain/business/web/broker/producer"
 	"github.com/St3plox/Blogchain/foundation/cachestore"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Storer interface {
 	Create(ctx context.Context, newLike Like) (Like, error)
 	QueryByID(ctx context.Context, likeID string) (Like, error)
 	QueryAllByUserID(ctx context.Context, userID string) ([]Like, error)
-	QueryAllByPostID(ctx context.Context, userID string) ([]Like, error)
+	QueryAllByPostID(ctx context.Context, postID string) ([]Like, error)
+	QueryByUserAndPostID(ctx context.Context, userID string, postID int64) (Like, error)
 	Update(ctx context.Context, updatedLike Like) (Like, error)
 	DeleteByID(ctx context.Context, likeID string) error
 }
@@ -46,6 +48,19 @@ func (c *Core) Create(ctx context.Context, newLike Like) (Like, error) {
 
 	newLike.UserID = user.ID
 
+	existingLike, err := c.storer.QueryByUserAndPostID(ctx, newLike.UserID.Hex(), newLike.PostID)
+	if err != nil && !IsLikeNotFound(err){
+		return Like{}, err
+	}
+
+	if existingLike.ID != primitive.NilObjectID {
+		return Like{}, ErrLikeAlreadyExists
+	}
+	
+
+	
+
+	// Proceed to create the new like since no existing like was found
 	savedLike, err := c.storer.Create(ctx, newLike)
 	if err != nil {
 		return Like{}, fmt.Errorf("error creating like: %w", err)
@@ -63,6 +78,7 @@ func (c *Core) Create(ctx context.Context, newLike Like) (Like, error) {
 		UserEmail:  user.Email,
 	}
 
+	// Send like event to producer
 	c.likeProducer.ProduceLikesEvents([]broker.LikeEvent{likeEvent})
 
 	return savedLike, nil
